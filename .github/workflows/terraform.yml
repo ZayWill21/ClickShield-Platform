@@ -39,6 +39,8 @@ jobs:
     - name: Terraform Init
       id: init
       run: terraform init -backend-config="organization=${{ secrets.TFCLOUD_ORG }}"
+      env:
+        TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
     
     - name: Terraform Validate
       id: validate
