@@ -1,0 +1,21 @@
+# Ignore all credential and variable files
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Ignore local override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore Terraform working directory and state files
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Ignore crash logs and CLI configuration
+crash.log
+.terraformrc
+terraform.rc
