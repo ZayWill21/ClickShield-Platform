@@ -3,7 +3,7 @@
        backend "remote" {
          hostname = "app.terraform.io"
          workspaces {
-           name = var.tf_workspaces
+           name = "ClickShield-Plateform"
          }
        }
      }
