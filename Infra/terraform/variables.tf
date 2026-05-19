@@ -22,3 +22,13 @@ variable "availability_zones" {
   type = list(string)
   description = "List of availablity zone"
 }
+
+variable "tfcloud_org" {
+  type = string
+  description = "The name of your Terraform Cloud organization."
+}
+
+variable "tfcloud_workspace" {
+  type = string
+  description = "The name of your Terraform workspace"
+}
