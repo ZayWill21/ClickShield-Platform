@@ -86,7 +86,7 @@ jobs:
         
         echo ""
         echo "=== Terraform Console Variable Test ==="
-        terraform console <<'TFEOF'
+        terraform console 
         var.AWS_REGION
         var.VPC_CIDR
         var.public_subnet_cidrs
@@ -95,7 +95,7 @@ jobs:
         length(var.private_subnet_cidrs)
         var.availability_zones
         length(var.availability_zones)
-        TFEOF
+        exit 
 
 # - name: Terraform Init with Backend Config
 #   run: |
