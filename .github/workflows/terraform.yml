@@ -54,18 +54,30 @@ jobs:
         role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
         aws-region: ${{ secrets.AWS_REGION }}
     
-    - name: Additional steps
+    - name: Check AWS Credentials
       run: |
           # Your commands that require AWS credentials
-         # aws sts get-caller-identity
+           aws sts get-caller-identity
+    
+    - name: Clean State for Fresh Plan
+      run: |
+        echo "=== Removing any cached state ==="
+        rm -f terraform.tfstate terraform.tfstate.backup
+        rm -rf .terraform/terraform.tfstate
+            
     
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
-      run: terraform init -backend-config="bucket=terraform-backendqwer1234-298350610133-us-east-1-an" -backend-config="key=path/terraform.tfstate" -backend-config="region=us-east-1"
-      env:
-        TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-    
+      run: |
+        terraform init -reconfigure 
+        # -backend-config="bucket=terraform-backendqwer1234-298350610133-us-east-1-an" -backend-config="key=path/terraform.tfstate" -backend-config="region=us-east-1"
+        
+        terraform refresh
+
+        # Verify state after init
+        terraform state list || echo "State is empty - resources not yet created"
+
     - name: Terraform Validate
       id: validate
       run: terraform validate 
@@ -115,9 +127,6 @@ jobs:
             repo: context.repo.repo,
             body: output
           })
-    - name: terraform state list
-      id: state-list
-      run: terraform state list
 
     # On push to "main", build or change infrastructure according to Terraform configuration files
     - name: Terraform Apply
