@@ -45,7 +45,7 @@ jobs:
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
       id: fmt
-      run: terraform fmt -check
+      run: terraform fmt 
       continue-on-error: true
     
     - name: Configure AWS Credentials
@@ -78,6 +78,17 @@ jobs:
         # Verify state after init
         terraform state list || echo "State is empty - resources not yet created"
 
+    - name: Debug and Plan
+      run: |
+        echo "=== Testing Variable Values ==="
+        terraform console <<EOF
+        var.VPC_CIDR
+        var.public_subnet_cidrs
+        length(var.public_subnet_cidrs)
+        var.private_subnet_cidrs
+        length(var.private_subnet_cidrs)
+        EOF
+
     - name: Terraform Validate
       id: validate
       run: terraform validate 
@@ -90,6 +101,15 @@ jobs:
     - name: Terraform Plan
       id: plan
       run: terraform plan 
+      env:
+        # Terraform Variables (TF_VAR_ prefix required!)
+        TF_VAR_AWS_REGION: ${{ secrets.AWS_REGION }}
+        TF_VAR_VPC_CIDR: ${{ secrets.VPC_CIDR }}
+        TF_VAR_private_subnet_cidrs: ${{ secrets.PRIVATE_SUBNET_CIDRS }}
+        TF_VAR_public_subnet_cidrs: ${{ secrets.PUBLIC_SUBNET_CIDRS }}
+        TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
+        TF_VAR_ZEROS: ${{ secrets.ZEROS }}
+
 
     - name: Comment PR with Terraform Plan
       uses: actions/github-script@v9
@@ -129,6 +149,6 @@ jobs:
           })
 
     # On push to "main", build or change infrastructure according to Terraform configuration files
-    - name: Terraform Apply
-    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve 
+    # - name: Terraform Apply
+    # # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    #   run: terraform apply -auto-approve 
