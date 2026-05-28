@@ -1,9 +1,7 @@
 # The configuration for the `remote` backend.
 terraform {
   backend "s3" {
-    bucket = var.S3_BUCKETNAME
-    key    = var.S3_KEY_PATH
-    region = var.AWS_REGION
+
   }
 }
 
