@@ -16,8 +16,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
-          role-to-assume: secret("AWS_IAM_ROLE")
-          aws-region: secret("AWS_REGION")
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
       - name: Additional steps
         run: |
           # Your commands that require AWS credentials
