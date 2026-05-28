@@ -53,15 +53,16 @@ jobs:
       with:
         role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
         aws-region: ${{ secrets.AWS_REGION }}
+    
     - name: Additional steps
       run: |
           # Your commands that require AWS credentials
-          aws sts get-caller-identity
+         # aws sts get-caller-identity
     
-          # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
-      run: terraform init -backend-config="bucket=terraform-backendqwer1234-298350610133-us-east-1-an" -backend-config="key=path/terraform.tfstate" -backend-config="region=us-east-1"
+      run: terraform init -backend-config="bucket=${{ secrets.S3_BUCKETNAME }}" -backend-config="key=${{ secrets.S3_KEY_PATH }}" -backend-config="region=${{ secrets.AWS_REGION }}"
       env:
         TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
     
@@ -74,7 +75,8 @@ jobs:
       id: plan
       run: terraform plan -input=false
 
-    - uses: actions/github-script@v9
+    - name: Comment PR with Terraform Plan
+      uses: actions/github-script@v9
       if: github.event_name == 'pull_request'
       env:
         PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
@@ -109,6 +111,9 @@ jobs:
             repo: context.repo.repo,
             body: output
           })
+    - name: terraform state list
+      id: state-list
+      run: terraform state list
 
     # On push to "main", build or change infrastructure according to Terraform configuration files
     # - name: Terraform Apply
