@@ -70,6 +70,10 @@ jobs:
       id: validate
       run: terraform validate 
 
+    - name: Terraform Show State
+      id: show
+      run: terraform show
+
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: plan
@@ -116,6 +120,6 @@ jobs:
       run: terraform state list
 
     # On push to "main", build or change infrastructure according to Terraform configuration files
-    # - name: Terraform Apply
-    #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    #   run: terraform apply -auto-approve -input=false
+    - name: Terraform Apply
+    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve 
