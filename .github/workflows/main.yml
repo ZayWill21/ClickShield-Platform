@@ -7,23 +7,18 @@ on:
   pull_request:
     branches: [ main ]
 
-# Permission can be added at job level or workflow level    
 permissions:
-      id-token: write   # This is required for requesting the JWT
-      contents: read    # This is required for actions/checkout
+  id-token: write
 jobs:
-  AssumeRoleAndCallIdentity:
+  run_job_with_aws:
     runs-on: ubuntu-latest
     steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v3
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
-          role-to-assume: <arn:aws:iam::111122223333:role/GitHubAction-AssumeRoleWithAction> #change to reflect your IAM role’s ARN
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: secrets.AWS_REGION
-      # Hello from AWS: WhoAmI
-      - name: Sts GetCallerIdentity
+          role-to-assume: secret("AWS_IAM_ROLE")
+          aws-region: secret("AWS_REGION")
+      - name: Additional steps
         run: |
+          # Your commands that require AWS credentials
           aws sts get-caller-identity
