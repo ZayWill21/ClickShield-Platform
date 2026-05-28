@@ -18,11 +18,12 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
+
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
     environment: production
+    
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -60,6 +61,24 @@ jobs:
        
         # Verify state after init
         terraform state list || echo "State is empty - resources not yet created"
+    
+    - name: Debug Environment Variables
+      env:
+        # Terraform Variables (TF_VAR_ prefix required!)
+        TF_VAR_AWS_REGION: ${{ secrets.AWS_REGION }}
+        TF_VAR_VPC_CIDR: ${{ secrets.VPC_CIDR }}
+        TF_VAR_private_subnet_cidrs: ${{ secrets.PRIVATE_SUBNET_CIDRS }}
+        TF_VAR_public_subnet_cidrs: ${{ secrets.PUBLIC_SUBNET_CIDRS }}
+        TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
+        TF_VAR_ZEROS: ${{ secrets.ZEROS }}
+      run: |
+        echo "=== Raw Environment Variables ==="
+        echo "AWS_REGION: '$TF_VAR_AWS_REGION'"
+        echo "VPC_CIDR: '$TF_VAR_VPC_CIDR'"
+        echo "Private Subnets: '$TF_VAR_private_subnet_cidrs'"
+        echo "Public Subnets: '$TF_VAR_public_subnet_cidrs'"
+        echo "Availability Zones: '$TF_VAR_availability_zones'"
+        echo "ZEROS: '$TF_VAR_ZEROS'"
 # - name: Terraform Init with Backend Config
 #   run: |
 #     cat > backend-config.tfvars <<EOF
@@ -144,3 +163,11 @@ jobs:
     # - name: Terraform Apply
     # # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     #   run: terraform apply -auto-approve 
+    #     env:
+    #       # Terraform Variables (TF_VAR_ prefix required!)
+    #       TF_VAR_AWS_REGION: ${{ secrets.AWS_REGION }}
+    #       TF_VAR_VPC_CIDR: ${{ secrets.VPC_CIDR }}
+    #       TF_VAR_private_subnet_cidrs: ${{ secrets.PRIVATE_SUBNET_CIDRS }}
+    #       TF_VAR_public_subnet_cidrs: ${{ secrets.PUBLIC_SUBNET_CIDRS }}
+    #       TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
+    #       TF_VAR_ZEROS: ${{ secrets.ZEROS }}
