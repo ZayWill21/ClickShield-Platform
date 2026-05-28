@@ -57,9 +57,9 @@ resource "aws_route_table" "public_rt" {
 
 # 6. Associate Public Subnets to Public Route Table
 resource "aws_route_table_association" "public_assoc" {
-  subnet_id      = aws_subnet.public_subnets.id
+  count          = length(var.public_subnet_cidrs)
+  subnet_id      = aws_subnet.public_subnets[count.index].id
   route_table_id = aws_route_table.public_rt.id
-  
 }
 
 # 7. NAT Gateway Setup (Allocates static IP and deploys in public subnet)
@@ -74,7 +74,7 @@ resource "aws_eip" "nat_eip" {
 # 8. Create NAT Gateway in the first public subnet
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.public.id # Must be deployed in a public subnet
+  subnet_id     = aws_subnet.public_subnets[0] .id # Must be deployed in a public subnet
   depends_on = [ aws_internet_gateway.gw ]
     tags = {
     "CreatedBy" = "Terraform"
@@ -96,8 +96,8 @@ resource "aws_route_table" "private_rt" {
 
 # 10. Associate Private Subnets to Private Route Table
 resource "aws_route_table_association" "private_assoc" {
-  for_each       = aws_subnet.private
-  subnet_id      = each.value.id
+  count          = length(var.private_subnet_cidrs)
+  subnet_id      = aws_subnet.private_subnets[count.index].id
   route_table_id = aws_route_table.private_rt.id
 }
 
