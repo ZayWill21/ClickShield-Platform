@@ -1,9 +1,9 @@
 provider "aws" {
-  region = var.aws_region
+  region = var.AWS_REGION
 }
 
 resource "aws_vpc" "vpc_main" {
-  cidr_block = var.vpc_cidr
+  cidr_block = var.VPC_CIDR
   enable_dns_hostnames = true
   enable_dns_support = true
 }

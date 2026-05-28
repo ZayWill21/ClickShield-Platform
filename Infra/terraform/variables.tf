@@ -1,9 +1,9 @@
-variable "aws_region" {
+variable "AWS_REGION" {
   description = "The AWS region to deploy resources in"
   type        = string
 }
 
-variable "vpc_cidr" {
+variable "VPC_CIDR" {
   type        = string
   description = "The main CIDR block for the VPC"
 }
@@ -31,4 +31,13 @@ variable "tfcloud_org" {
 variable "tfcloud_workspace" {
   type = string
   description = "The name of your Terraform workspace"
+}
+
+variable "S3_KEY_PATH" {
+  type = string
+  description = "Path within the S3 bucket to store Terraform state (e.g., 'terraform.tfstate')"
+}
+variable "S3_BUCKETNAME" {
+  type = string
+  description = "The name of your S3 bucket"
 }
