@@ -79,6 +79,24 @@ jobs:
         echo "Public Subnets: '$TF_VAR_public_subnet_cidrs'"
         echo "Availability Zones: '$TF_VAR_availability_zones'"
         echo "ZEROS: '$TF_VAR_ZEROS'"
+
+        echo "=== Character Count Check ==="
+        echo "Public subnet string length: ${#TF_VAR_public_subnet_cidrs}"
+        echo "Private subnet string length: ${#TF_VAR_private_subnet_cidrs}"
+        
+        echo ""
+        echo "=== Terraform Console Variable Test ==="
+        terraform console <<'TFEOF'
+        var.AWS_REGION
+        var.VPC_CIDR
+        var.public_subnet_cidrs
+        length(var.public_subnet_cidrs)
+        var.private_subnet_cidrs
+        length(var.private_subnet_cidrs)
+        var.availability_zones
+        length(var.availability_zones)
+        TFEOF
+
 # - name: Terraform Init with Backend Config
 #   run: |
 #     cat > backend-config.tfvars <<EOF
@@ -108,6 +126,19 @@ jobs:
     - name: Terraform Show State
       id: show
       run: terraform show
+
+    - name: Create Variables File from Secrets
+      run: |
+        cat > auto.tfvars <<EOF
+        AWS_REGION           = "${{ secrets.AWS_REGION }}"
+        VPC_CIDR             = "${{ secrets.VPC_CIDR }}"
+        private_subnet_cidrs = ${{ secrets.PRIVATE_SUBNET_CIDRS }}
+        public_subnet_cidrs  = ${{ secrets.PUBLIC_SUBNET_CIDRS }}
+        availability_zones   = ${{ secrets.AVAILABILITY_ZONES }}
+        ZEROS                = "${{ secrets.ZEROS }}"
+        EOF
+        
+        cat auto.tfvars
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
