@@ -47,8 +47,18 @@ jobs:
       id: fmt
       run: terraform fmt -check
       continue-on-error: true
-
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v6.1.0
+      with:
+        role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+        aws-region: ${{ secrets.AWS_REGION }}
+    - name: Additional steps
+      run: |
+          # Your commands that require AWS credentials
+          aws sts get-caller-identity
+    
+          # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
       run: terraform init -backend-config="bucket=terraform-backend3er1324rq3fqwef" -backend-config="key=path/terraform.tfstate" -backend-config="region=us-east-1"
