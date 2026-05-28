@@ -1,8 +1,8 @@
 # Ignore all credential and variable files
-*.tfvars
-*.tfvars.json
-*.auto.tfvars
-*.auto.tfvars.json
+# *.tfvars
+# *.tfvars.json
+# *.auto.tfvars
+# *.auto.tfvars.json
 
 # Ignore local override files
 override.tf
