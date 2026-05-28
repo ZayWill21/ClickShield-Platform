@@ -18,10 +18,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: Additional steps
-        run: |
-          # Your commands that require AWS credentials
-          aws sts get-caller-identity
+          
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
@@ -54,40 +51,36 @@ jobs:
         role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
         aws-region: ${{ secrets.AWS_REGION }}
     
-    - name: Check AWS Credentials
-      run: |
-          # Your commands that require AWS credentials
-           aws sts get-caller-identity
-    
-    - name: Clean State for Fresh Plan
-      run: |
-        echo "=== Removing any cached state ==="
-        rm -f terraform.tfstate terraform.tfstate.backup
-        rm -rf .terraform/terraform.tfstate
-            
-    
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
       run: |
         terraform init -reconfigure 
         # -backend-config="bucket=terraform-backendqwer1234-298350610133-us-east-1-an" -backend-config="key=path/terraform.tfstate" -backend-config="region=us-east-1"
-        
-        terraform refresh
-
+       
         # Verify state after init
         terraform state list || echo "State is empty - resources not yet created"
+# - name: Terraform Init with Backend Config
+#   run: |
+#     cat > backend-config.tfvars <<EOF
+#     bucket         = "${{ secrets.TF_BACKEND_BUCKET }}"
+#     key            = "infrastructure/terraform.tfstate"
+#     region         = "${{ secrets.AWS_REGION }}"
+#     encrypt        = true
+#     EOF
+    
+#     terraform init -backend-config=backend-config.tfvars -reconfigure
 
-    - name: Debug and Plan
-      run: |
-        echo "=== Testing Variable Values ==="
-        terraform console <<EOF
-        var.VPC_CIDR
-        var.public_subnet_cidrs
-        length(var.public_subnet_cidrs)
-        var.private_subnet_cidrs
-        length(var.private_subnet_cidrs)
-        EOF
+    # - name: Debug and Plan
+    #   run: |
+    #     echo "=== Testing Variable Values ==="
+    #     terraform console <<EOF
+    #     var.VPC_CIDR
+    #     var.public_subnet_cidrs
+    #     length(var.public_subnet_cidrs)
+    #     var.private_subnet_cidrs
+    #     length(var.private_subnet_cidrs)
+    #     EOF
 
     - name: Terraform Validate
       id: validate
@@ -110,43 +103,42 @@ jobs:
         TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
         TF_VAR_ZEROS: ${{ secrets.ZEROS }}
 
+    # - name: Comment PR with Terraform Plan
+    #   uses: actions/github-script@v9
+    #   if: github.event_name == 'pull_request'
+    #   env:
+    #     PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     script: |
+    #       const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+    #       #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+    #       #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+    #       <details><summary>Validation Output</summary>
 
-    - name: Comment PR with Terraform Plan
-      uses: actions/github-script@v9
-      if: github.event_name == 'pull_request'
-      env:
-        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-          <details><summary>Validation Output</summary>
+    #       \`\`\`\n
+    #       ${{ steps.validate.outputs.stdout }}
+    #       \`\`\`
 
-          \`\`\`\n
-          ${{ steps.validate.outputs.stdout }}
-          \`\`\`
+    #       </details>
 
-          </details>
+    #       #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
-          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+    #       <details><summary>Show Plan</summary>
 
-          <details><summary>Show Plan</summary>
+    #       \`\`\`\n
+    #       ${process.env.PLAN}
+    #       \`\`\`\n
+    #       </details>
 
-          \`\`\`\n
-          ${process.env.PLAN}
-          \`\`\`\n
-          </details>
+    #       *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`\`, Workflow: \`${{ github.workflow }}\`*`;
 
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`\`, Workflow: \`${{ github.workflow }}\`*`;
-
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
+    #       github.rest.issues.createComment({
+    #         issue_number: context.issue.number,
+    #         owner: context.repo.owner,
+    #         repo: context.repo.repo,
+    #         body: output
+    #       })
 
     # On push to "main", build or change infrastructure according to Terraform configuration files
     # - name: Terraform Apply
