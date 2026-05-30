@@ -34,7 +34,3 @@ module "networking" {
   AWS_REGION           = var.AWS_REGION
   ZEROS                = var.ZEROS
 }
-
-module "container_services" {
-  source = "./infra/terraform/aws/container_services"
-}
