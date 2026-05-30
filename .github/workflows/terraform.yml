@@ -86,16 +86,16 @@ jobs:
         
         echo ""
         echo "=== Terraform Console Variable Test ==="
-        terraform console 
-        var.AWS_REGION
-        var.VPC_CIDR
-        var.public_subnet_cidrs
-        length(var.public_subnet_cidrs)
-        var.private_subnet_cidrs
-        length(var.private_subnet_cidrs)
-        var.availability_zones
-        length(var.availability_zones)
-        exit 
+        terraform console max(5, 12, 9)
+        # var.AWS_REGION
+        # var.VPC_CIDR
+        # var.public_subnet_cidrs
+        # length(var.public_subnet_cidrs)
+        # var.private_subnet_cidrs
+        # length(var.private_subnet_cidrs)
+        # var.availability_zones
+        # length(var.availability_zones)
+        # exit 
 
 # - name: Terraform Init with Backend Config
 #   run: |
