@@ -71,17 +71,6 @@ jobs:
     - name: Terraform Show State
       id: show
       run: terraform show
-    
-    - name: Debug Environment Variables
-      run: |       
-        echo ""
-        echo "=== Terraform Console Variable Test ==="
-        echo "=== Testing Basic Arithmetic ==="
-        # echo "1 + 1" | terraform console
-          
-        echo ""
-        echo "=== Testing String Operations ==="
-        # echo '"test-value"' | terraform console
 
 # - name: Terraform Init with Backend Config
 #   run: |
@@ -105,8 +94,6 @@ jobs:
     #     length(var.private_subnet_cidrs)
     #     EOF
 
-
-
     - name: Create Variables File from Secrets
       run: |
         cat > auto.tfvars <<EOF
@@ -124,14 +111,13 @@ jobs:
     - name: Terraform Plan
       id: plan
       run: terraform plan 
-      env:
-        # Terraform Variables (TF_VAR_ prefix required!)
-        TF_VAR_AWS_REGION: ${{ secrets.AWS_REGION }}
-        TF_VAR_VPC_CIDR: ${{ secrets.VPC_CIDR }}
-        TF_VAR_private_subnet_cidrs: ${{ secrets.PRIVATE_SUBNET_CIDRS }}
-        TF_VAR_public_subnet_cidrs: ${{ secrets.PUBLIC_SUBNET_CIDRS }}
-        TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
-        TF_VAR_ZEROS: ${{ secrets.ZEROS }}
+      
+    - name: Test Variables After Plan
+      run: |
+        terraform plan -out=tfplan
+        
+        echo "=== Testing if resources will be created ==="
+        terraform show -json tfplan | jq '.resource_changes | length'
 
     # - name: Comment PR with Terraform Plan
     #   uses: actions/github-script@v9
