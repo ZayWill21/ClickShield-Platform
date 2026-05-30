@@ -6,3 +6,9 @@ terraform {
     region = "us-east-1"
   }
 }
+
+resource "aws_ebs_volume" "aws" {
+  availability_zone = "us-east-1a"
+  size              = 10
+  description       = "EBS volume for testing"
+}

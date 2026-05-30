@@ -139,7 +139,24 @@ jobs:
         aws s3 ls s3://terraform-backendqwer1234-298350610133-us-east-1-an/path/terraform.tfstate || echo "State file not found"
 
 
-
+    - name: Verify Terraform Configuration Files
+      run: |
+        echo "=== Terraform Files in Repository ==="
+        find . -name "*.tf" -type f
+        
+        echo ""
+        echo "=== File Contents ==="
+        for f in *.tf; do
+          if [ -f "$f" ]; then
+            echo "--- $f ---"
+            cat "$f"
+            echo ""
+          fi
+        done
+        
+        echo ""
+        echo "=== Expected Resources from Configuration ==="
+        terraform show -json | jq '.values.root_module.resources // [] | length' || echo "No resources defined"
 
 
 
