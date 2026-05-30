@@ -62,15 +62,25 @@ jobs:
     - name: Terraform Init
       id: init
       run: |
-        terraform init 
+        terraform init --reconfigure
 
     - name: Terraform Validate
       id: validate
       run: terraform validate 
 
-    - name: Terraform Show State
-      id: show
-      run: terraform show
+    - name: Verify State Access
+      run: |
+        echo "=== Current State Resources ==="
+        terraform state list || echo "Empty state - first run"
+        
+        echo ""
+        echo "=== State Statistics ==="
+        terraform state pull | jq '{
+          version: .version,
+          terraform_version: .terraform_version,
+          resource_count: (.resources | length),
+          lineage: .lineage
+        }'
 
 # - name: Terraform Init with Backend Config
 #   run: |
@@ -118,7 +128,6 @@ jobs:
         
         echo "=== Testing if resources will be created ==="
         terraform show -json tfplan | jq '.resource_changes | length'
-
 
     - name: Check S3 State Backend
       run: |
