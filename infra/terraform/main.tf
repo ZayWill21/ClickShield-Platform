@@ -33,5 +33,4 @@ module "networking" {
   VPC_CIDR             = var.VPC_CIDR
   AWS_REGION           = var.AWS_REGION
   ZEROS                = var.ZEROS
-
 }

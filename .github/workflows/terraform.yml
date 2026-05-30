@@ -57,7 +57,19 @@ jobs:
       with:
         role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
         aws-region: ${{ secrets.AWS_REGION }}
-    
+
+    - name: Create Terraform Variables
+      run: |
+        cat > terraform.tfvars <<'EOF'
+        AWS_REGION           = "${{ secrets.AWS_REGION }}"
+        VPC_CIDR             = "${{ secrets.VPC_CIDR }}"
+        private_subnet_cidrs = ${{ secrets.PRIVATE_SUBNET_CIDRS }}
+        public_subnet_cidrs  = ${{ secrets.PUBLIC_SUBNET_CIDRS }}
+        availability_zones   = ${{ secrets.AVAILABILITY_ZONES }}
+        ZEROS                = ${{ secrets.ZEROS}}
+        EOF
+      working-directory: ./infra/terraform
+
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
@@ -93,41 +105,10 @@ jobs:
     
 #     terraform init -backend-config=backend-config.tfvars -reconfigure
 
-    # - name: Debug and Plan
-    #   run: |
-    #     echo "=== Testing Variable Values ==="
-    #     terraform console <<EOF
-    #     var.VPC_CIDR
-    #     var.public_subnet_cidrs
-    #     length(var.public_subnet_cidrs)
-    #     var.private_subnet_cidrs
-    #     length(var.private_subnet_cidrs)
-    #     EOF
-
-    - name: Create Variables File from Secrets
-      run: |
-        cat > auto.tfvars <<EOF
-        AWS_REGION           = "${{ secrets.AWS_REGION }}"
-        VPC_CIDR             = "${{ secrets.VPC_CIDR }}"
-        private_subnet_cidrs = ${{ secrets.PRIVATE_SUBNET_CIDRS }}
-        public_subnet_cidrs  = ${{ secrets.PUBLIC_SUBNET_CIDRS }}
-        availability_zones   = ${{ secrets.AVAILABILITY_ZONES }}
-        ZEROS                = "${{ secrets.ZEROS }}"
-        EOF
-        
-        cat auto.tfvars
-
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: plan
       run: terraform plan 
-
-    - name: Test Variables After Plan
-      run: |
-        terraform plan -out=tfplan
-        
-        echo "=== Testing if resources will be created ==="
-        terraform show -json tfplan | jq '.resource_changes | length'
 
     - name: Check S3 State Backend
       run: |
@@ -137,7 +118,6 @@ jobs:
         echo ""
         echo "=== Checking State File Exists ==="
         aws s3 ls s3://terraform-backendqwer1234-298350610133-us-east-1-an/path/terraform.tfstate || echo "State file not found"
-
 
     - name: Verify Terraform Configuration Files
       run: |
