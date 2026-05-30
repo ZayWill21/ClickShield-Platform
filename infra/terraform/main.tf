@@ -1,12 +1,4 @@
-
-resource "aws_ebs_volume" "aws" {
-  availability_zone = "us-east-1a"
-  size              = 10
-  tags = {
-    "CreatedBy" = "Terraform"
-  }
-}
-
+# This file defines the main Terraform configuration for the ClickShield Platform infrastructure. It includes the necessary modules to set up the AWS networking components.
 module "networking" {
   source = "./aws/networking"
   public_subnet_cidrs  = var.public_subnet_cidrs
@@ -16,3 +8,4 @@ module "networking" {
   AWS_REGION           = var.AWS_REGION
   ZEROS                = var.ZEROS
 }
+

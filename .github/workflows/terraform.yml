@@ -58,6 +58,7 @@ jobs:
         role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    # Create a terraform.tfvars file with the Terraform variables defined in GitHub Secrets
     - name: Create Terraform Variables
       run: |
         cat > terraform.tfvars <<'EOF'
@@ -76,9 +77,10 @@ jobs:
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
-      run: terraform init --reconfigure 
+      run: terraform init --reconfigure -backend-config="bucket=${{ secrets.S3_BUCKETNAME }}" -backend-config="key=${{ secrets.S3_KEY_PATH }}" -backend-config="region=${{ secrets.AWS_REGION }}" -backend-config="encrypt=true"
       working-directory: ./infra/terraform
 
+    # Validates the Terraform configuration files in a directory, and checks whether the configuration is syntactically valid and internally consistent
     - name: Terraform Validate
       id: validate
       run: terraform validate 
@@ -86,27 +88,7 @@ jobs:
     - name: Verify State Access
       run: |
         echo "=== Current State Resources ==="
-        terraform state list || echo "Empty state - first run"
-        
-        echo ""
-        echo "=== State Statistics ==="
-        terraform state pull | jq '{
-          version: .version,
-          terraform_version: .terraform_version,
-          resource_count: (.resources | length),
-          lineage: .lineage
-        }'
-
-# - name: Terraform Init with Backend Config
-#   run: |
-#     cat > backend-config.tfvars <<EOF
-#     bucket         = "${{ secrets.TF_BACKEND_BUCKET }}"
-#     key            = "infrastructure/terraform.tfstate"
-#     region         = "${{ secrets.AWS_REGION }}"
-#     encrypt        = true
-#     EOF
-    
-#     terraform init -backend-config=backend-config.tfvars -reconfigure
+        terraform state list -state s3://${{ secrets.S3_BUCKETNAME }}/${{ secrets.S3_KEY_PATH }} || echo "Empty state - first run"
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
@@ -114,78 +96,47 @@ jobs:
       run: terraform plan 
       working-directory: ./infra/terraform
 
-    - name: Check S3 State Backend
-      run: |
-        echo "=== Verifying S3 Backend Access ==="
-        aws s3 ls s3://terraform-backendqwer1234-298350610133-us-east-1-an || echo "Cannot access state bucket"
-        
-        echo ""
-        echo "=== Checking State File Exists ==="
-        aws s3 ls s3://terraform-backendqwer1234-298350610133-us-east-1-an/path/terraform.tfstate || echo "State file not found"
-
     - name: Verify Terraform Configuration Files
       run: |
         echo "=== Terraform Files in Repository ==="
         find . -name "*.tf" -type f
-        
-        echo ""
-        echo "=== File Contents ==="
-        for f in *.tf; do
-          if [ -f "$f" ]; then
-            echo "--- $f ---"
-            cat "$f"
-            echo ""
-          fi
-        done
-        
-        echo ""
-        echo "=== Expected Resources from Configuration ==="
-        terraform show -json | jq '.values.root_module.resources // [] | length' || echo "No resources defined"
 
+    - name: Comment PR with Terraform Plan
+      uses: actions/github-script@v9
+      if: github.event_name == 'pull_request'
+      env:
+        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+          <details><summary>Validation Output</summary>
 
+          \`\`\`\n
+          ${{ steps.validate.outputs.stdout }}
+          \`\`\`
 
+          </details>
 
+          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
 
+          <details><summary>Show Plan</summary>
 
+          \`\`\`\n
+          ${process.env.PLAN}
+          \`\`\`\n
+          </details>
 
+          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`\`, Workflow: \`${{ github.workflow }}\`*`;
 
-
-    # - name: Comment PR with Terraform Plan
-    #   uses: actions/github-script@v9
-    #   if: github.event_name == 'pull_request'
-    #   env:
-    #     PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-    #   with:
-    #     github-token: ${{ secrets.GITHUB_TOKEN }}
-    #     script: |
-    #       const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-    #       #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-    #       #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-    #       <details><summary>Validation Output</summary>
-
-    #       \`\`\`\n
-    #       ${{ steps.validate.outputs.stdout }}
-    #       \`\`\`
-
-    #       </details>
-
-    #       #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-
-    #       <details><summary>Show Plan</summary>
-
-    #       \`\`\`\n
-    #       ${process.env.PLAN}
-    #       \`\`\`\n
-    #       </details>
-
-    #       *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`\`, Workflow: \`${{ github.workflow }}\`*`;
-
-    #       github.rest.issues.createComment({
-    #         issue_number: context.issue.number,
-    #         owner: context.repo.owner,
-    #         repo: context.repo.repo,
-    #         body: output
-    #       })
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: output
+          })
 
     # On push to "main", build or change infrastructure according to Terraform configuration files
     # - name: Terraform Apply
