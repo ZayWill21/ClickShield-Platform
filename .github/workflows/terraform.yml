@@ -68,6 +68,9 @@ jobs:
         availability_zones   = ${{ secrets.AVAILABILITY_ZONES }}
         ZEROS                = ${{ secrets.ZEROS}}
         EOF
+        
+        echo "=== Generated terraform.tfvars ==="
+        cat terraform.tfvars
       working-directory: ./infra/terraform
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
@@ -109,6 +112,7 @@ jobs:
     - name: Terraform Plan
       id: plan
       run: terraform plan 
+      working-directory: ./infra/terraform
 
     - name: Check S3 State Backend
       run: |
