@@ -111,13 +111,34 @@ jobs:
     - name: Terraform Plan
       id: plan
       run: terraform plan 
-      
+
     - name: Test Variables After Plan
       run: |
         terraform plan -out=tfplan
         
         echo "=== Testing if resources will be created ==="
         terraform show -json tfplan | jq '.resource_changes | length'
+
+
+    - name: Check S3 State Backend
+      run: |
+        echo "=== Verifying S3 Backend Access ==="
+        aws s3 ls s3://terraform-backendqwer1234-298350610133-us-east-1-an || echo "Cannot access state bucket"
+        
+        echo ""
+        echo "=== Checking State File Exists ==="
+        aws s3 ls s3://terraform-backendqwer1234-298350610133-us-east-1-an/path/terraform.tfstate || echo "State file not found"
+
+
+
+
+
+
+
+
+
+
+
 
     # - name: Comment PR with Terraform Plan
     #   uses: actions/github-script@v9
