@@ -30,7 +30,6 @@ jobs:
       TF_VAR_public_subnet_cidrs: ${{ secrets.PUBLIC_SUBNET_CIDRS }}
       TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
       TF_VAR_ZEROS: ${{ secrets.ZEROS }}
-    
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -63,30 +62,26 @@ jobs:
     - name: Terraform Init
       id: init
       run: |
-        terraform init -reconfigure 
-        # -backend-config="bucket=terraform-backendqwer1234-298350610133-us-east-1-an" -backend-config="key=path/terraform.tfstate" -backend-config="region=us-east-1"
-       
-        # Verify state after init
-        terraform state list || echo "State is empty - resources not yet created"
+        terraform init 
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate 
+
+    - name: Terraform Show State
+      id: show
+      run: terraform show
     
     - name: Debug Environment Variables
-      env:
-        # Terraform Variables (TF_VAR_ prefix required!)
-        TF_VAR_AWS_REGION: ${{ secrets.AWS_REGION }}
-        TF_VAR_VPC_CIDR: ${{ secrets.VPC_CIDR }}
-        TF_VAR_private_subnet_cidrs: ${{ secrets.PRIVATE_SUBNET_CIDRS }}
-        TF_VAR_public_subnet_cidrs: ${{ secrets.PUBLIC_SUBNET_CIDRS }}
-        TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
-        TF_VAR_ZEROS: ${{ secrets.ZEROS }}
       run: |       
         echo ""
         echo "=== Terraform Console Variable Test ==="
         echo "=== Testing Basic Arithmetic ==="
-        echo "1 + 1" | terraform console
+        # echo "1 + 1" | terraform console
           
         echo ""
         echo "=== Testing String Operations ==="
-        echo '"test-value"' | terraform console
+        # echo '"test-value"' | terraform console
 
 # - name: Terraform Init with Backend Config
 #   run: |
@@ -110,13 +105,7 @@ jobs:
     #     length(var.private_subnet_cidrs)
     #     EOF
 
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate 
 
-    - name: Terraform Show State
-      id: show
-      run: terraform show
 
     - name: Create Variables File from Secrets
       run: |
