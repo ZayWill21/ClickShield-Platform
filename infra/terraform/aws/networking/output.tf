@@ -12,5 +12,5 @@ output "subnet_public" {
 }
 
 output "nat_gateway" {
-  value = aws_nat_gateway.nat.arn
+  value = aws_nat_gateway.nat.id
 }
