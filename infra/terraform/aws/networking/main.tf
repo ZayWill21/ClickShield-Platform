@@ -9,6 +9,7 @@ resource "aws_vpc" "vpc_main" {
   enable_dns_support = true
   tags = {
     "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
   }
 }
 
@@ -17,6 +18,7 @@ resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.vpc_main.id
   tags = {
     "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
   }
 }
 
@@ -28,6 +30,7 @@ resource "aws_subnet" "private_subnets" {
   availability_zone = var.availability_zones[count.index]
     tags = {
     "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
   }
 }
 
@@ -52,6 +55,7 @@ resource "aws_route_table" "public_rt" {
   }
     tags = {
     "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
   }
 }
 
@@ -68,6 +72,7 @@ resource "aws_eip" "nat_eip" {
   depends_on = [aws_internet_gateway.gw]
     tags = {
     "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
   }
 }
 
@@ -78,6 +83,7 @@ resource "aws_nat_gateway" "nat" {
   depends_on = [ aws_internet_gateway.gw ]
     tags = {
     "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
   }
 }
 
@@ -91,6 +97,7 @@ resource "aws_route_table" "private_rt" {
   }
     tags = {
     "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
   }
 }
 

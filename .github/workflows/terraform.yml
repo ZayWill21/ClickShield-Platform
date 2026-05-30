@@ -30,6 +30,11 @@ jobs:
       TF_VAR_public_subnet_cidrs: ${{ secrets.PUBLIC_SUBNET_CIDRS }}
       TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
       TF_VAR_ZEROS: ${{ secrets.ZEROS }}
+      TF_VAR_encrypt: ${{ secrets.ENCRYPT }}
+      TF_VAR_ecr_kms_arn: ${{ secrets.ECR_KMS_ARN }}
+      TF_VAR_eks_cluster_role: ${{ secrets.EKS_CLUSTER_ROLE }}
+      TF_VAR_eks_node_group_role: ${{ secrets.EKS_NODE_GROUP_ROLE }}
+      TF_VAR_EKS_KMS_ARN: ${{ secrets.EKS_KMS_ARN }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -58,22 +63,6 @@ jobs:
         role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    # Create a terraform.tfvars file with the Terraform variables defined in GitHub Secrets
-    - name: Create Terraform Variables
-      run: |
-        cat > terraform.tfvars <<'EOF'
-        AWS_REGION           = "${{ secrets.AWS_REGION }}"
-        VPC_CIDR             = "${{ secrets.VPC_CIDR }}"
-        private_subnet_cidrs = ${{ secrets.PRIVATE_SUBNET_CIDRS }}
-        public_subnet_cidrs  = ${{ secrets.PUBLIC_SUBNET_CIDRS }}
-        availability_zones   = ${{ secrets.AVAILABILITY_ZONES }}
-        ZEROS                = ${{ secrets.ZEROS}}
-        EOF
-        
-        echo "=== Generated terraform.tfvars ==="
-        cat terraform.tfvars
-      working-directory: ./infra/terraform
-
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
@@ -101,52 +90,7 @@ jobs:
         echo "=== Terraform Files in Repository ==="
         find . -name "*.tf" -type f
 
-    - name: Comment PR with Terraform Plan
-      uses: actions/github-script@v9
-      if: github.event_name == 'pull_request'
-      env:
-        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-          <details><summary>Validation Output</summary>
-
-          \`\`\`\n
-          ${{ steps.validate.outputs.stdout }}
-          \`\`\`
-
-          </details>
-
-          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
-
-          <details><summary>Show Plan</summary>
-
-          \`\`\`\n
-          ${process.env.PLAN}
-          \`\`\`\n
-          </details>
-
-          *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`\`, Workflow: \`${{ github.workflow }}\`*`;
-
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
-
     # On push to "main", build or change infrastructure according to Terraform configuration files
     # - name: Terraform Apply
-    # # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     #   run: terraform apply -auto-approve 
-    #     env:
-    #       # Terraform Variables (TF_VAR_ prefix required!)
-    #       TF_VAR_AWS_REGION: ${{ secrets.AWS_REGION }}
-    #       TF_VAR_VPC_CIDR: ${{ secrets.VPC_CIDR }}
-    #       TF_VAR_private_subnet_cidrs: ${{ secrets.PRIVATE_SUBNET_CIDRS }}
-    #       TF_VAR_public_subnet_cidrs: ${{ secrets.PUBLIC_SUBNET_CIDRS }}
-    #       TF_VAR_availability_zones: ${{ secrets.AVAILABILITY_ZONES }}
-    #       TF_VAR_ZEROS: ${{ secrets.ZEROS }}
+    #   working-directory: ./infra/terraform
