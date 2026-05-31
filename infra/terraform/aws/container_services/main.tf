@@ -18,6 +18,7 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
 
 # 2. Create KMS Key for ECR Encryption
 resource "aws_kms_key" "ecr_kms_arn" {
+  enable_key_rotation     = true
     description = "KMS key for encrypting ECR repository"
 }
 
@@ -29,6 +30,7 @@ import {
 # 3. Create KMS Key for EKS Cluster Encryption
 resource "aws_kms_key" "eks_kms_arn" {
     description = "KMS key for encrypting EKS cluster"
+    enable_key_rotation     = true
 }
 
 import {

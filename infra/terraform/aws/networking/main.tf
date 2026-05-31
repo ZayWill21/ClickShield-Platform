@@ -22,7 +22,7 @@ resource "aws_cloudwatch_log_group" "flow_log_group" {
 
 resource "aws_iam_role" "vpc_flow_logs_role" {
   name = "vpc_flow_logs_role"
-  assume_role_policy = jsondecode({})
+  assume_role_policy = jsonencode({})
   description = "IAM role for VPC Flow Logs"
 }
 
