@@ -34,12 +34,12 @@ import {
 }
 
 # 3. Create KMS Key for EKS Cluster Encryption
-resource "aws_kms_key" "eks-kms-key" {
+resource "aws_kms_key" "eks_kms_arn" {
     description = "KMS key for encrypting EKS cluster"
 }
 
 import {
-  to = eks-kms-key
+  to = aws_kms_key.eks_kms_arn
   id = var.eks_kms_arn
 }
 
@@ -84,7 +84,7 @@ resource "aws_iam_role" "eks_cluster_role" {
 }
 
 import {
-  to = eks_cluster_role
+  to = aws_iam_role.eks_cluster_role
   id = var.eks_cluster_role
 }
 
@@ -152,8 +152,8 @@ resource "aws_iam_role" "eks_node_group_role" {
 }
 
 import {
-  to = eks_node_group_role
-  id = var.eks_cluster_role
+  to = aws_iam_role.eks_node_group_role
+  id = var.eks_node_group_role
 }
 # 4. Deploy EKS Node Group for Worker Nodes
 resource "aws_eks_node_group" "compute" {
