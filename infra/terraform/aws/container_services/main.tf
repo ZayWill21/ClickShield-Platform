@@ -148,7 +148,7 @@ resource "aws_eks_node_group" "compute" {
   cluster_name = aws_eks_cluster.eks_cluster.name
   node_role_arn = aws_iam_role.eks_node_group_role.arn
   release_version = data.aws_ssm_parameter.eks_ami_release_version.value
-  ami_type = AL2023_x86_64_STANDARD
+  ami_type = "AL2023_x86_64_STANDARD"
   instance_types = "t3.large"
   scaling_config {
     desired_size = 1
