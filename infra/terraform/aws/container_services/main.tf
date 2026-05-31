@@ -1,3 +1,13 @@
+# module "networking" {
+#   source = "../networking"
+#   public_subnet_cidrs  = var.public_subnet_cidrs
+#   private_subnet_cidrs = var.private_subnet_cidrs
+#   availability_zones   = var.availability_zones
+#   VPC_CIDR             = var.VPC_CIDR
+#   AWS_REGION           = var.AWS_REGION
+#   ZEROS                = var.ZEROS
+# }
+
 # 1. Deploy ECR Repository for Container Images
 resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   name = "clickshield-platform-repo"
@@ -11,17 +21,17 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   force_delete = true
   encryption_configuration {
     encryption_type = var.encrypt
-    kms_key = aws_kms_key.ecr_encryption_key.arn
+    kms_key = aws_kms_key.ecr_kms_arn.arn
   }
 }
 
 # 2. Create KMS Key for ECR Encryption
-resource "aws_kms_key" "ecr_encryption_kms_key" {
+resource "aws_kms_key" "ecr_kms_arn" {
     description = "KMS key for encrypting ECR repository"
 }
 
 import {
-  to = aws_kms_key.ecr_encryption_key
+  to = aws_kms_key.ecr_kms_arn
   id = var.ecr_kms_arn
 }
 
@@ -41,10 +51,6 @@ resource "aws_eks_cluster" "eks_cluster" {
   version = "1.35"
   role_arn = aws_iam_role.eks_cluster_role.arn
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
-  depends_on = [
-    aws_iam_role.eks_cluster_role, aws_kms_key.eks-kms-key
-  ]
-
   access_config {
     authentication_mode = "API"
   }
@@ -53,20 +59,21 @@ resource "aws_eks_cluster" "eks_cluster" {
     provider {
       key_arn = var.eks_kms_arn
     }
-    resources = secrets
+    resources = "secrets"
   }
 
   vpc_config {
     endpoint_private_access = true
     endpoint_public_access  = false
     subnet_ids = [
-        aws_subnet.private_subnets[*].id
+        var.private_subnet_ids[*] # in to import mode networking
     ]
   }
   tags = {
     "CreatedBy" = "Terraform"
     "auto-delete" = "no"
   }
+  depends_on = [ aws_iam_role.eks_cluster_role, aws_kms_key.eks_kms_arn ]
 }
 
 resource "aws_iam_role" "eks_cluster_role" {

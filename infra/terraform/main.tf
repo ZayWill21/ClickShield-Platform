@@ -13,6 +13,7 @@ module "container_services" {
   source = "./aws/container_services"
   # Networking outputs
   private_subnet_cidrs = module.networking.private_subnet_cidrs
+  private_subnet_ids   = module.networking.private_subnet_ids
   
   # IAM and KMS outputs
   eks_cluster_role     = var.eks_cluster_role
