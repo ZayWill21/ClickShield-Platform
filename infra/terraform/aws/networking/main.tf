@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.AWS_REGION
-}
-
 # 1. Create VPC
 resource "aws_vpc" "vpc_main" {
   cidr_block = var.VPC_CIDR
