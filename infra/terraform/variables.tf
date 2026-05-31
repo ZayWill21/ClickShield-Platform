@@ -26,3 +26,29 @@ variable "availability_zones" {
   type = list(string)
   description = "List of availablity zone"
 }
+
+
+variable "encrypt" {
+  type = string
+  description = "Specifys Encryption"
+}
+
+variable "ecr_kms_arn" {
+  type = string
+  description = "The ARN of the KMS key to use for encrypting the ECR repository"
+}
+
+variable "eks_kms_arn" {
+  type = string
+  description = "The ARN of the KMS key to use for encrypting the EKS cluster"
+}
+
+variable "eks_cluster_role" {
+  type = string
+  description = "eks cluster IAM role"
+}
+
+variable "eks_node_group_role" {
+  type = string
+  description = "The ARN of the IAM role to use for the EKS node group"
+}

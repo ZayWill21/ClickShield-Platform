@@ -2,6 +2,10 @@ provider "aws" {
   region = var.AWS_REGION
 }
 
+module "networking" {
+  source = "./networking"
+}
+
 # 1. Deploy ECR Repository for Container Images
 resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   name = "clickshield-platform-repo"
@@ -29,6 +33,16 @@ import {
   id = var.ecr_kms_arn
 }
 
+# 3. Create KMS Key for EKS Cluster Encryption
+resource "aws_kms_key" "eks-kms-key" {
+    description = "KMS key for encrypting EKS cluster"
+}
+
+import {
+  to = eks-kms-key
+  id = var.eks_kms_arn
+}
+
 # 3. Deploy EKS Cluster for Container Orchestration
 resource "aws_eks_cluster" "eks_cluster" {
   name    = "clickshield-eks-cluster"
@@ -36,7 +50,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   role_arn = aws_iam_role.eks_cluster_role.arn
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   depends_on = [
-    aws_iam_role.eks_cluster_role
+    aws_iam_role.eks_cluster_role, aws_kms_key.eks-kms-key
   ]
 
   access_config {
@@ -45,7 +59,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   encryption_config {
     provider {
-      key_arn = var.eks-kms-key
+      key_arn = var.eks_kms_arn
     }
     resources = secrets
   }
