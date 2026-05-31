@@ -10,14 +10,14 @@ permissions:
   contents: read
 
 jobs:
-  run_job_with_aws:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6.1.0
-        with:
-          role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
-          aws-region: ${{ secrets.AWS_REGION }}
+  # run_job_with_aws:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v6.1.0
+  #       with:
+  #         role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
 
   terraform:
     name: 'Terraform'
@@ -51,6 +51,12 @@ jobs:
       uses: hashicorp/setup-terraform@v4
       with:
         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+    
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v6.1.0
+      with:
+        role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
+        aws-region: ${{ secrets.AWS_REGION }}
 
     # Checks that all Terraform configuration files adhere to a canonical format
     - name: Terraform Format
