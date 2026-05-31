@@ -1,13 +1,3 @@
-# module "networking" {
-#   source = "../networking"
-#   public_subnet_cidrs  = var.public_subnet_cidrs
-#   private_subnet_cidrs = var.private_subnet_cidrs
-#   availability_zones   = var.availability_zones
-#   VPC_CIDR             = var.VPC_CIDR
-#   AWS_REGION           = var.AWS_REGION
-#   ZEROS                = var.ZEROS
-# }
-
 # 1. Deploy ECR Repository for Container Images
 resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   name = "clickshield-platform-repo"
@@ -65,9 +55,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   vpc_config {
     endpoint_private_access = true
     endpoint_public_access  = false
-    subnet_ids = [
-        var.private_subnet_ids[*] # in to import mode networking
-    ]
+    subnet_ids = [var.private_subnet_ids[*] ] # in to import mode networking
   }
   tags = {
     "CreatedBy" = "Terraform"
