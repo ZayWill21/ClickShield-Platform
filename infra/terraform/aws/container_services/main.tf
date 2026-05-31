@@ -49,13 +49,13 @@ resource "aws_eks_cluster" "eks_cluster" {
     provider {
       key_arn = var.eks_kms_arn
     }
-    resources = "secrets"
+    resources = ["secrets"]
   }
 
   vpc_config {
     endpoint_private_access = true
     endpoint_public_access  = false
-    subnet_ids = [var.private_subnet_ids[*] ] # in to import mode networking
+    subnet_ids = var.private_subnet_ids
   }
   tags = {
     "CreatedBy" = "Terraform"

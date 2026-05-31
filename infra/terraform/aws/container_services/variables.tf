@@ -54,5 +54,4 @@ variable "eks_node_group_role" {
 variable "private_subnet_ids" {
   type        = list(string)
   description = "List of private subnet IDs"
-  
 }
