@@ -17,7 +17,6 @@ module "container_services" {
   public_subnet_cidrs  = var.public_subnet_cidrs
   availability_zones   = var.availability_zones
   VPC_CIDR             = var.VPC_CIDR
-  AWS_REGION           = var.AWS_REGION
   ZEROS                = var.ZEROS
   
   # IAM and KMS outputs
