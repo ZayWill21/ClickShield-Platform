@@ -113,7 +113,7 @@ resource "aws_eip" "nat_eip" {
 # 8. Create NAT Gateway in the first public subnet
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.public_subnets[0] .id # Must be deployed in a public subnet
+  subnet_id     = aws_subnet.public_subnets[var.availability_zones[0]].id # Must be deployed in a public subnet
   depends_on = [ aws_internet_gateway.gw ]
     tags = {
     "CreatedBy" = "Terraform"

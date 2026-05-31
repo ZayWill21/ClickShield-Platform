@@ -4,26 +4,22 @@ output "vpc_id" {
   value       = aws_vpc.vpc_main.id
 }
 
-# Export private subnet IDs
 output "private_subnet_ids" {
-  description = "List of private subnet IDs"
-  value       = aws_subnet.private_subnets[*].id
+  description = "IDs of the private subnets"
+  value       = values(aws_subnet.private_subnets)[*].id
 }
 
-# Export public subnet IDs
 output "public_subnet_ids" {
-  description = "List of public subnet IDs"
-  value       = aws_subnet.public_subnets[*].id
+  description = "IDs of the public subnets"
+  value       = values(aws_subnet.public_subnets)[*].id
 }
 
-# Export private subnet CIDRs
 output "private_subnet_cidrs" {
-  description = "List of private subnet CIDR blocks"
-  value       = aws_subnet.private_subnets[*].cidr_block
+  description = "CIDR blocks of the private subnets"
+  value       = values(aws_subnet.private_subnets)[*].cidr_block
 }
 
-# Export public subnet CIDRs
 output "public_subnet_cidrs" {
-  description = "List of public subnet CIDR blocks"
-  value       = aws_subnet.public_subnets[*].cidr_block
+  description = "CIDR blocks of the public subnets"
+  value       = values(aws_subnet.public_subnets)[*].cidr_block
 }
