@@ -149,14 +149,14 @@ resource "aws_eks_node_group" "compute" {
   node_role_arn = aws_iam_role.eks_node_group_role.arn
   release_version = data.aws_ssm_parameter.eks_ami_release_version.value
   ami_type = "AL2023_x86_64_STANDARD"
-  instance_types = "t3.large"
+  instance_types = ["t3.large"]
   scaling_config {
     desired_size = 1
     max_size = 2
     min_size = 1
   }
   disk_size = 30
-  subnet_ids = var.private_subnet_cidrs[*].id
+  subnet_ids = var.private_subnet_ids
   depends_on = [ aws_iam_role.eks_node_group_role, aws_eks_addon.kube-proxy, aws_eks_addon.vpc-cni ]
   tags = {
     "CreatedBy" = "Terraform"
