@@ -1,0 +1,35 @@
+# ---------- build ----------
+FROM node:18-alpine AS build
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build              # tsc -> /app/dist
+
+# ---------- deps (prod only) ----------
+FROM node:18-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+# ---------- runtime ----------
+FROM node:18-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=8001
+
+COPY --from=deps  /app/node_modules ./node_modules
+COPY --from=build /app/dist          ./dist
+COPY package.json ./
+
+# Drop privileges
+RUN chown -R node:node /app
+USER node
+
+EXPOSE 8001
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
+  CMD wget -qO- http://127.0.0.1:8001/api/check-url > /dev/null 2>&1 || exit 1
+
+CMD ["node", "dist/server.js"]

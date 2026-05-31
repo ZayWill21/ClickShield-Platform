@@ -4,14 +4,15 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   image_scanning_configuration {
     scan_on_push = true
   }
-  tags = {
-    "CreatedBy" = "Terraform"
-    "auto-delete" = "no"
-  }
+  image_tag_mutability = "IMMUTABLE"
   force_delete = true
   encryption_configuration {
     encryption_type = var.encrypt
     kms_key = aws_kms_key.ecr_kms_arn.arn
+  }
+  tags = {
+    "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
   }
 }
 

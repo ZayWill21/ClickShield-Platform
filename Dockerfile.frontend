@@ -1,0 +1,58 @@
+# ---------- build ----------
+FROM node:18-alpine AS build
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+# Optional: bake an absolute API base URL. Leave empty to use relative /api paths.
+ARG VITE_BACKEND_API_URL=""
+ENV VITE_BACKEND_API_URL=$VITE_BACKEND_API_URL
+RUN npm run build              # tsc && vite build  -> /app/dist
+
+# ---------- runtime ----------
+FROM nginx:1.27-alpine AS runtime
+
+# SPA + /api reverse proxy to the backend k8s Service
+RUN rm /etc/nginx/conf.d/default.conf
+COPY <<'EOF' /etc/nginx/conf.d/default.conf
+server {
+  listen 8080;
+  server_name _;
+
+  root /usr/share/nginx/html;
+  index index.html;
+
+  # SPA history fallback
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+
+  # API reverse proxy -> backend Service (ClusterIP)
+  # Override BACKEND_UPSTREAM at runtime via env if needed (see CMD below).
+  location /api/ {
+    proxy_pass http://clickshield-backend.default.svc.cluster.local:8001/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  location /healthz {
+    return 200 "ok";
+    add_header Content-Type text/plain;
+  }
+}
+EOF
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Run as non-root
+RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx \
+ && touch /var/run/nginx.pid && chown nginx:nginx /var/run/nginx.pid
+
+USER nginx
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]

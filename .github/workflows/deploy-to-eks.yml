@@ -10,7 +10,7 @@ env:
   EKS_CLUSTER_NAME:  ${{ secrets.AWS_EKS_CLUSTER_NAME }}
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
-  AWS_ACTIONS_ROLE:  ${{ secrets.AWS_ACTIONS_ROLE }}
+  AWS_ACTIONS_ROLE:  ${{ secrets.ACTIONS_IAM_ROLE }}
 
 jobs:
   run_job_with_aws:
@@ -24,16 +24,18 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2 
   
-      - name: Config AWS Creds
-        uses: aws-actions/configure-aws-credentials@main 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{env.AWS_REGION}}
-          role-to-assume: ${{env.AWS_ACTIONS_ROLE}}
-  
+          role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+  deploy_to_ecr_and_eks:
+    needs: run_job_with_aws
+    runs-on: ubuntu-latest
+    steps:
       - name: Login to Amazon ECR Public
-        id: login-ecr-public
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
           registry-type: public

@@ -26,3 +26,8 @@ variable "availability_zones" {
   type = list(string)
   description = "List of availablity zone"
 }
+
+variable "vpc_flow_logs_role" {
+  type = string
+  description = "IAM role ARN for VPC Flow Logs"
+}

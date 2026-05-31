@@ -9,6 +9,28 @@ resource "aws_vpc" "vpc_main" {
   }
 }
 
+resource "aws_flow_log" "flow_log" {
+  iam_role_arn    = aws_iam_role.vpc_flow_logs_role.arn
+  log_destination = aws_cloudwatch_log_group.flow_log_group.arn
+  traffic_type    = "ALL"
+  vpc_id          = aws_vpc.vpc_main.id
+}
+
+resource "aws_cloudwatch_log_group" "flow_log_group" {
+  name = "flow-log-group"
+}
+
+resource "aws_iam_role" "vpc_flow_logs_role" {
+  name = "vpc_flow_logs_role"
+  assume_role_policy = jsondecode({})
+  description = "IAM role for VPC Flow Logs"
+}
+
+import {
+  to = vpc_flow_logs_role
+  id = var.vpc_flow_logs_role
+}
+
 # 2. Create Internet Gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.vpc_main.id
