@@ -2,10 +2,6 @@ provider "aws" {
   region = var.AWS_REGION
 }
 
-module "networking" {
-  source = "./networking"
-}
-
 # 1. Deploy ECR Repository for Container Images
 resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   name = "clickshield-platform-repo"
