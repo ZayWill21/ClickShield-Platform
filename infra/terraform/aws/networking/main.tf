@@ -49,26 +49,32 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-# 3. Create Private Subnets
+# 3. Private Subnets
 resource "aws_subnet" "private_subnets" {
-  count = length(var.private_subnet_cidrs)
+  for_each = zipmap(var.availability_zones, var.private_subnet_cidrs)
+
   vpc_id            = aws_vpc.vpc_main.id
-  cidr_block        = var.private_subnet_cidrs[count.index] 
-  availability_zone = var.availability_zones[count.index]
-    tags = {
-    "CreatedBy" = "Terraform"
+  availability_zone = each.key    
+  cidr_block        = each.value   
+
+  tags = {
+    Name        = "private-${each.key}"
+    CreatedBy   = "Terraform"
     "auto-delete" = "no"
   }
 }
 
-# 4. Create Public Subnets
+# 4. Public Subnets
 resource "aws_subnet" "public_subnets" {
-  count = length(var.public_subnet_cidrs)
+  for_each = zipmap(var.availability_zones, var.public_subnet_cidrs)
+
   vpc_id            = aws_vpc.vpc_main.id
-  cidr_block        = var.public_subnet_cidrs[count.index]
-  availability_zone = var.availability_zones[count.index]
-    tags = {
-    "CreatedBy" = "Terraform"
+  availability_zone = each.key
+  cidr_block        = each.value
+
+  tags = {
+    Name      = "public-${each.key}"
+    CreatedBy = "Terraform"
   }
 }
 
@@ -77,7 +83,7 @@ resource "aws_route_table" "public_rt" {
   depends_on = [ aws_internet_gateway.gw ]
   vpc_id = aws_vpc.vpc_main.id
   route {
-    cidr_block = var.ZEROS
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.gw.id
   }
     tags = {
@@ -88,8 +94,9 @@ resource "aws_route_table" "public_rt" {
 
 # 6. Associate Public Subnets to Public Route Table
 resource "aws_route_table_association" "public_assoc" {
-  count          = length(var.public_subnet_cidrs)
-  subnet_id      = aws_subnet.public_subnets[count.index].id
+  for_each = aws_subnet.public_subnets
+
+  subnet_id      = each.value.id
   route_table_id = aws_route_table.public_rt.id
 }
 
@@ -130,8 +137,8 @@ resource "aws_route_table" "private_rt" {
 
 # 10. Associate Private Subnets to Private Route Table
 resource "aws_route_table_association" "private_assoc" {
-  count          = length(var.private_subnet_cidrs)
-  subnet_id      = aws_subnet.private_subnets[count.index].id
+  for_each = aws_subnet.private_subnets
+
+  subnet_id      = each.value.id
   route_table_id = aws_route_table.private_rt.id
 }
-
