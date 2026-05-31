@@ -49,6 +49,11 @@ jobs:
         role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    - name: Mask AWS account ID
+      run: |
+        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+        echo "::add-mask::$ACCOUNT_ID"
+
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
@@ -80,6 +85,6 @@ jobs:
         find . -name "*.tf" -type f
 
     #  On push to "main", build or change infrastructure according to Terraform configuration files
-    - name: Terraform Apply
-      run: terraform apply -auto-approve 
-      working-directory: ./infra/terraform
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve 
+    #   working-directory: ./infra/terraform

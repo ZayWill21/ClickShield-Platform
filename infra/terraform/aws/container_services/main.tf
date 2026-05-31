@@ -70,7 +70,18 @@ resource "aws_eks_cluster" "eks_cluster" {
 resource "aws_iam_role" "eks_cluster_role" {
     name    = "eks_cluster_role"
     description = "IAM role for EKS cluster"
-    assume_role_policy = jsonencode({})
+    assume_role_policy = jsonencode({
+  "Version":"2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "eks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+})
 }
 
 import {
@@ -138,7 +149,18 @@ data "aws_ssm_parameter" "eks_ami_release_version" {
 resource "aws_iam_role" "eks_node_group_role" {
   name = "eks_node_group_role"
   description = "IAM role for EKS node group"
-  assume_role_policy = jsonencode({})
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ec2.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+})
 }
 
 import {

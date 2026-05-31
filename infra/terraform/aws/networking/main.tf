@@ -22,9 +22,18 @@ resource "aws_cloudwatch_log_group" "flow_log_group" {
 
 resource "aws_iam_role" "vpc_flow_logs_role" {
   name = "vpc_flow_logs_role"
-  assume_role_policy = jsonencode({})
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "vpc-flow-logs.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
   description = "IAM role for VPC Flow Logs"
 }
+  
+
 
 import {
   to = aws_iam_role.vpc_flow_logs_role
