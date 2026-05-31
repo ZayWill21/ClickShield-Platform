@@ -10,15 +10,6 @@ permissions:
   contents: read
 
 jobs:
-  # run_job_with_aws:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Configure AWS Credentials
-  #       uses: aws-actions/configure-aws-credentials@v6.1.0
-  #       with:
-  #         role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
-  #         aws-region: ${{ secrets.AWS_REGION }}
-
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
@@ -58,27 +49,24 @@ jobs:
         role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    # Checks that all Terraform configuration files adhere to a canonical format
-    - name: Terraform Format
-      id: fmt
-      run: terraform fmt 
-      continue-on-error: true
-
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
       id: init
       run: terraform init --reconfigure -backend-config="bucket=${{ secrets.S3_BUCKETNAME }}" -backend-config="key=${{ secrets.S3_KEY_PATH }}" -backend-config="region=${{ secrets.AWS_REGION }}" -backend-config="encrypt=true"
       working-directory: ./infra/terraform
 
+    # Checks that all Terraform configuration files adhere to a canonical format
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt 
+      continue-on-error: true
+      working-directory: ./infra/terraform
+
     # Validates the Terraform configuration files in a directory, and checks whether the configuration is syntactically valid and internally consistent
     - name: Terraform Validate
       id: validate
       run: terraform validate 
-
-    - name: Verify State Access
-      run: |
-        echo "=== Current State Resources ==="
-        terraform state list -state s3://${{ secrets.S3_BUCKETNAME }}/${{ secrets.S3_KEY_PATH }} || echo "Empty state - first run"
+      working-directory: ./infra/terraform
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
