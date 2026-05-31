@@ -27,7 +27,7 @@ resource "aws_iam_role" "vpc_flow_logs_role" {
 }
 
 import {
-  to = vpc_flow_logs_role
+  to = aws_iam_role.vpc_flow_logs_role
   id = var.vpc_flow_logs_role
 }
 
