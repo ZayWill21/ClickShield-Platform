@@ -27,7 +27,6 @@ variable "availability_zones" {
   description = "List of availablity zone"
 }
 
-
 variable "encrypt" {
   type = string
   description = "Specifys Encryption"
@@ -51,4 +50,9 @@ variable "eks_cluster_role" {
 variable "eks_node_group_role" {
   type = string
   description = "The ARN of the IAM role to use for the EKS node group"
+}
+
+variable "vpc_flow_logs_role" {
+  type = string
+  description = "The ARN of the IAM role for VPC flow logs"
 }

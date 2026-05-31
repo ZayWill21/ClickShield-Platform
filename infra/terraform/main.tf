@@ -6,6 +6,7 @@ module "networking" {
   availability_zones   = var.availability_zones
   VPC_CIDR             = var.VPC_CIDR
   AWS_REGION           = var.AWS_REGION
+  vpc_flow_logs_role   = var.vpc_flow_logs_role
   ZEROS                = var.ZEROS
 }
 
