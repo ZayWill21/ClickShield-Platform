@@ -34,7 +34,7 @@ jobs:
       TF_VAR_ecr_kms_arn: ${{ secrets.ECR_KMS_ARN }}
       TF_VAR_eks_cluster_role: ${{ secrets.EKS_CLUSTER_ROLE }}
       TF_VAR_eks_node_group_role: ${{ secrets.EKS_NODE_GROUP_ROLE }}
-      TF_VAR_EKS_KMS_ARN: ${{ secrets.EKS_KMS_ARN }}
+      TF_VAR_eks_kms_arn: ${{ secrets.EKS_KMS_ARN }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
