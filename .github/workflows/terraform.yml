@@ -72,6 +72,10 @@ jobs:
       id: validate
       run: terraform validate 
       working-directory: ./infra/terraform
+    
+    - name: Terraform Debug Plan
+      run: terraform plan 2>&1 | grep -A2 vpc_flow_logs_role
+      working-directory: ./infra/terraform
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
@@ -79,12 +83,7 @@ jobs:
       run: terraform plan 
       working-directory: ./infra/terraform
 
-    - name: Verify Terraform Configuration Files
-      run: |
-        echo "=== Terraform Files in Repository ==="
-        find . -name "*.tf" -type f
-
-    #  On push to "main", build or change infrastructure according to Terraform configuration files
-    - name: Terraform Apply
-      run: terraform apply -auto-approve 
-      working-directory: ./infra/terraform
+    # #  On push to "main", build or change infrastructure according to Terraform configuration files
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve 
+    #   working-directory: ./infra/terraform

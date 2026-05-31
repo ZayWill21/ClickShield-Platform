@@ -16,26 +16,16 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   }
 }
 
-# 2. import KMS Key for ECR Encryption
+# 2. KMS Key for ECR Encryption
 resource "aws_kms_key" "ecr_kms_arn" {
   enable_key_rotation     = true
     description = "KMS key for encrypting ECR repository"
 }
 
-import {
-  to = aws_kms_key.ecr_kms_arn
-  id = var.ecr_kms_arn
-}
-
-# 3. import KMS Key for EKS Cluster Encryption
+# 3. KMS Key for EKS Cluster Encryption
 resource "aws_kms_key" "eks_kms_arn" {
     description = "KMS key for encrypting EKS cluster"
     enable_key_rotation     = true
-}
-
-import {
-  to = aws_kms_key.eks_kms_arn
-  id = var.eks_kms_arn
 }
 
 # 3. Deploy EKS Cluster for Container Orchestration
@@ -82,11 +72,6 @@ resource "aws_iam_role" "eks_cluster_role" {
     }
   ]
 })
-}
-
-import {
-  to = aws_iam_role.eks_cluster_role
-  id = var.eks_cluster_role
 }
 
 # Create EKS add-ons:
@@ -163,10 +148,7 @@ resource "aws_iam_role" "eks_node_group_role" {
 })
 }
 
-import {
-  to = aws_iam_role.eks_node_group_role
-  id = var.eks_node_group_role
-}
+
 # 4. Deploy EKS Node Group for Worker Nodes
 resource "aws_eks_node_group" "compute" {
   node_group_name = "compute"

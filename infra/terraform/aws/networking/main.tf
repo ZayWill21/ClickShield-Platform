@@ -32,13 +32,6 @@ resource "aws_iam_role" "vpc_flow_logs_role" {
   })
   description = "IAM role for VPC Flow Logs"
 }
-  
-
-
-import {
-  to = aws_iam_role.vpc_flow_logs_role
-  id = var.vpc_flow_logs_role
-}
 
 # 2. Create Internet Gateway
 resource "aws_internet_gateway" "gw" {
