@@ -24,10 +24,7 @@ module "container_services" {
   ZEROS                = var.ZEROS
   
   # IAM and KMS outputs
-  eks_cluster_role     = var.eks_cluster_role
-  eks_node_group_role  = var.eks_node_group_role
-  eks_kms_arn          = var.eks_kms_arn
-  ecr_kms_arn          = var.ecr_kms_arn
+  aws_account_id       = var.aws_account_id
   
   # Other variables
   AWS_REGION           = var.AWS_REGION

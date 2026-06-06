@@ -31,6 +31,10 @@ variable "encrypt" {
   type = string
   description = "Specifys Encryption"
 }
+variable "aws_account_id" {
+  type = string
+  description = "My AWS Account ID "
+}
 
 variable "ecr_kms_arn" {
   type = string
