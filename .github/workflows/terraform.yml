@@ -77,7 +77,6 @@ jobs:
     - name: Terraform state rm
       id: remove
       run: |
-            terraform state rm aws_iam_role.eks_cluster_role
             terraform state rm aws_iam_role.eks_cs_node_group_role
             terraform state rm aws_kms_key.ecr_kms_arn
       working-directory: ./infra/terraform
