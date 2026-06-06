@@ -262,7 +262,7 @@ data "aws_ssm_parameter" "eks_ami_release_version" {
 }
 
 resource "aws_iam_role" "eks_cs_node_group_role" {
-  name = "eks_node_group_role"
+  name = "eks_cs_node_group_role"
   description = "IAM role for EKS node group"
   assume_role_policy = jsonencode({
     "Version": "2012-10-17",
@@ -298,7 +298,7 @@ resource "aws_iam_role_policy_attachment" "attach_multiple" {
 resource "aws_eks_node_group" "compute" {
   node_group_name = "compute"
   cluster_name = aws_eks_cluster.eks_cluster.name
-  node_role_arn = aws_iam_role.eks_node_group_role.arn
+  node_role_arn = aws_iam_role.eks_cs_node_group_role.arn
   release_version = data.aws_ssm_parameter.eks_ami_release_version.value
   ami_type = "AL2023_x86_64_STANDARD"
   instance_types = ["t3.large"]
@@ -309,7 +309,7 @@ resource "aws_eks_node_group" "compute" {
   }
   disk_size = 30
   subnet_ids = var.private_subnet_ids
-  depends_on = [ aws_iam_role.eks_node_group_role, aws_eks_addon.kube-proxy, aws_eks_addon.vpc-cni ]
+  depends_on = [ aws_iam_role.eks_cs_node_group_role, aws_eks_addon.kube-proxy, aws_eks_addon.vpc-cni ]
   tags = {
     "CreatedBy" = "Terraform"
     "auto-delete" = "no"
