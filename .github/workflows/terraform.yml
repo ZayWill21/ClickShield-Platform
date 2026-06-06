@@ -27,6 +27,7 @@ jobs:
       TF_VAR_eks_node_group_role: ${{ secrets.EKS_NODE_GROUP_ROLE }}
       TF_VAR_eks_kms_arn: ${{ secrets.EKS_KMS_ARN }}
       TF_VAR_vpc_flow_logs_role: ${{ secrets.VPC_FLOW_LOGS_ROLE }}
+      TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -73,15 +74,15 @@ jobs:
       run: terraform validate 
       working-directory: ./infra/terraform
     
-    - name: Terraform Import
-      id: import
-      run: |
-        # terraform import module.networking.aws_iam_role.vpc_flow_logs_role ${{ secrets.VPC_FLOW_LOGS_ROLE }}
-        terraform import module.container_services.aws_kms_key.ecr_kms_arn ${{ secrets.ECR_KMS_ARN }}
-        terraform import module.container_services.aws_kms_key.eks_kms_arn ${{ secrets.EKS_KMS_ARN }}
-        terraform import module.container_services.aws_iam_role.eks_cluster_role ${{ secrets.EKS_CLUSTER_ROLE }}
-        terraform import module.container_services.aws_iam_role.eks_node_group_role ${{ secrets.EKS_NODE_GROUP_ROLE }}
-      working-directory: ./infra/terraform
+    # - name: Terraform Import
+    #   id: import
+    #   run: |
+    #     terraform import module.networking.aws_iam_role.vpc_flow_logs_role ${{ secrets.VPC_FLOW_LOGS_ROLE }}
+    #     terraform import module.container_services.aws_kms_key.ecr_kms_arn ${{ secrets.ECR_KMS_ARN }}
+    #     terraform import module.container_services.aws_kms_key.eks_kms_arn ${{ secrets.EKS_KMS_ARN }}
+    #     terraform import module.container_services.aws_iam_role.eks_cluster_role ${{ secrets.EKS_CLUSTER_ROLE }}
+    #     terraform import module.container_services.aws_iam_role.eks_node_group_role ${{ secrets.EKS_NODE_GROUP_ROLE }}
+    #   working-directory: ./infra/terraform
     
     - name: Terraform Debug Plan
       run: terraform plan 2>&1 | grep -A2 vpc_flow_logs_role

@@ -7,7 +7,7 @@ permissions:
   contents: read
 env:
   ECR_REPOSITORY: 
-  EKS_CLUSTER_NAME:  ${{ secrets.AWS_EKS_CLUSTER_NAME }}
+  EKS_CLUSTER_NAME:  clickshield-eks-cluster
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
   AWS_ACTIONS_ROLE:  ${{ secrets.ACTIONS_IAM_ROLE }}
@@ -21,29 +21,29 @@ jobs:
     steps:
       - name: Set short git commit SHA
         id: commit
-        uses: prompt/actions-commit-hash@v2
+        uses: prompt/actions-commit-hash@v4
   
       - name: Check out code
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v6 
   
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
           role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: Login to Amazon ECR Public
-        id: login-ecr-public
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
 
-      - name: Build, tag, and push docker image to Amazon ECR Public
+      - name: Build, tag, and push docker image to Amazon ECR
         env:
-          REPOSITORY_URI: # Replaced with your actual URI
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: clickshield-platform-repo
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REPOSITORY_URI:$IMAGE_TAG .
-          docker push $REPOSITORY_URI:$IMAGE_TAG
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Update kube config 
         run: |

@@ -17,15 +17,130 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
 }
 
 # 2. KMS Key for ECR Encryption
-resource "aws_kms_key" "ecr_kms_arn" {
+resource "aws_kms_key" "ecr_kms_key" {
   enable_key_rotation     = true
-    description = "KMS key for encrypting ECR repository"
+  description = "KMS key for encrypting ECR repository"
+  policy = jsonencode({
+  "Version": "2012-10-17",
+  "Id": "auto-ecr-1",
+  "Statement": [
+    {
+      "Sid": "Allow access through Amazon ECR for all principals in the account that are authorized to use Amazon ECR",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:CreateGrant",
+        "kms:DescribeKey",
+        "kms:RetireGrant"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "kms:CallerAccount": "var.aws_account_id",
+          "kms:ViaService": "ecr.${var.AWS_REGION}.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Sid": "Allow direct access to key metadata to the account",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.aws_account_id}:root"
+      },
+      "Action": [
+        "kms:Describe*",
+        "kms:Get*",
+        "kms:List*",
+        "kms:RevokeGrant"
+      ],
+      "Resource": "*"
+    }
+  ]
+})
 }
 
 # 3. KMS Key for EKS Cluster Encryption
-resource "aws_kms_key" "eks_kms_arn" {
+resource "aws_kms_key" "eks_kms_key" {
     description = "KMS key for encrypting EKS cluster"
     enable_key_rotation     = true
+    policy = jsonencode({
+  "Id": "key-consolepolicy-3",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Enable IAM User Permissions",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.aws_account_id}:root"
+      },
+      "Action": "kms:*",
+      "Resource": "*"
+    },
+    {
+      "Sid": "Allow access for Key Administrators",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.aws_account_id}:role/AmazonEKSClusterRole"
+      },
+      "Action": [
+        "kms:Create*",
+        "kms:Describe*",
+        "kms:Enable*",
+        "kms:List*",
+        "kms:Put*",
+        "kms:Update*",
+        "kms:Revoke*",
+        "kms:Disable*",
+        "kms:Get*",
+        "kms:Delete*",
+        "kms:TagResource",
+        "kms:UntagResource",
+        "kms:ScheduleKeyDeletion",
+        "kms:CancelKeyDeletion"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Allow use of the key",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.aws_account_id}:role/AmazonEKSClusterRole"
+      },
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:DescribeKey",
+        "kms:GetPublicKey"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Allow attachment of persistent resources",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.aws_account_id}:role/AmazonEKSClusterRole"
+      },
+      "Action": [
+        "kms:CreateGrant",
+        "kms:ListGrants",
+        "kms:RevokeGrant"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "Bool": {
+          "kms:GrantIsForAWSResource": "true"
+        }
+      }
+    }
+  ]
+})
 }
 
 # 3. Deploy EKS Cluster for Container Orchestration
@@ -72,6 +187,21 @@ resource "aws_iam_role" "eks_cluster_role" {
     }
   ]
 })
+}
+
+locals {
+  policy_arns = [
+          "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+          "arn:aws:iam::aws:policy/AmazonEKSLoadBalancingPolicy",
+          "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+          "arn:aws:iam::aws:policy/CloudWatchFullAccess",
+        ]
+}
+
+resource "aws_iam_role_policy_attachment" "attach_multiple_EKS" {
+  for_each   = toset(local.policy_arns)
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = each.value
 }
 
 # Create EKS add-ons:
@@ -131,7 +261,7 @@ data "aws_ssm_parameter" "eks_ami_release_version" {
   name = "/aws/service/eks/optimized-ami/${aws_eks_cluster.eks_cluster.version}/amazon-linux-2023/x86_64/standard/recommended/release_version"
 }
 
-resource "aws_iam_role" "eks_node_group_role" {
+resource "aws_iam_role" "eks_cs_node_group_role" {
   name = "eks_node_group_role"
   description = "IAM role for EKS node group"
   assume_role_policy = jsonencode({
@@ -148,6 +278,21 @@ resource "aws_iam_role" "eks_node_group_role" {
 })
 }
 
+locals {
+  policy_arns_ng = [
+          "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+          "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+          "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+          "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+          "arn:aws:iam::aws:policy/AmazonSSMPatchAssociation",
+  ]
+}
+
+resource "aws_iam_role_policy_attachment" "attach_multiple" {
+  for_each   = toset(local.policy_arns_ng)
+  role       = aws_iam_role.eks_node_group_role.name
+  policy_arn = each.value
+}
 
 # 4. Deploy EKS Node Group for Worker Nodes
 resource "aws_eks_node_group" "compute" {

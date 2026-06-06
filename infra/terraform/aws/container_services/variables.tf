@@ -3,6 +3,11 @@ variable "AWS_REGION" {
   type        = string
 }
 
+variable "aws_account_id" {
+  description = "The AWS account ID where the EKS cluster will be deployed"
+  type        = string
+}
+
 variable "VPC_CIDR" {
   type        = string
   description = "The main CIDR block for the VPC"

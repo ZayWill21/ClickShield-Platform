@@ -20,26 +20,56 @@ jobs:
     name: Scan container image with Trivy
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Check out code
+        uses: actions/checkout@v6 
+  
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          role-to-assume: ${{ secrets.ACTIONS_IAM_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build an image from Dockerfile
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: clickshield-platform-repo
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t docker.io/my-organization/my-app:${{ github.sha }} . # this builds an image of my application using the Dockerfile in the root of the repository and tags it with the current commit SHA
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG . # this builds an image of my application using the Dockerfile in the root of the repository and tags it with the current commit SHA
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: clickshield-platform-repo
+          IMAGE_TAG: ${{ github.sha }}
         with:
-          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}' #  this scans the image we just built
+          image-ref: '${{env.REGISTRY}}/${{env.REPOSITORY}}:${{env.IMAGE_TAG}}' #  this scans the image we just built
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
+          exit-code: '0' # ensures that the Trivy scan step does not fail even if vulnerabilities are found, so that the SARIF file can be uploaded to the GitHub Security tab in the next step
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
+        if: always() # ensures that the SARIF file is uploaded even if the Trivy scan fails (e.g. if vulnerabilities are found)
         with:
           sarif_file: 'trivy-results.sarif'
+
+      # Scan #2: gate the build. Fails ONLY on CRITICAL.  
+      - name: Trivy scan (fail on CRITICAL)
+        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+        with:
+          image-ref: '${{ steps.login-ecr.outputs.registry }}/clickshield-platform-repo:${{ github.sha }}'
+          format: 'table'
+          severity: 'CRITICAL'
+          ignore-unfixed: true   # optional: skip vulns with no fix available
+          exit-code: '1'         # <-- this is what stops the build
   tfsec:
     name: Run tfsec sarif report
     runs-on: ubuntu-latest
@@ -60,5 +90,4 @@ jobs:
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v3 # Uploads the SARIF file to GitHub Security tab
         with:
-          # Path to SARIF file relative to the root of the repository
           sarif_file: tfsec.sarif
