@@ -90,7 +90,7 @@ jobs:
       run: terraform plan 
       working-directory: ./infra/terraform
 
-    # #  On push to "main", build or change infrastructure according to Terraform configuration files
-    # - name: Terraform Apply
-    #   run: terraform apply -auto-approve 
-    #   working-directory: ./infra/terraform
+    #  On push to "main", build or change infrastructure according to Terraform configuration files
+    - name: Terraform Apply
+      run: terraform apply -auto-approve 
+      working-directory: ./infra/terraform
