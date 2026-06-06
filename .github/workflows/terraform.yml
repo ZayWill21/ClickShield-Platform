@@ -74,11 +74,11 @@ jobs:
       run: terraform validate 
       working-directory: ./infra/terraform
     
-    - name: Terraform state rm
-      id: remove
-      run: |
-            terraform state rm aws_kms_key.ecr_kms_arn
-      working-directory: ./infra/terraform
+    # - name: Terraform state rm
+    #   id: remove
+    #   run: |
+    #         terraform state rm aws_kms_key.ecr_kms_arn
+    #   working-directory: ./infra/terraform
     
     - name: Terraform Debug Plan
       run: terraform plan 2>&1 | grep -A2 vpc_flow_logs_role
