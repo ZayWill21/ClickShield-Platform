@@ -8,7 +8,7 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   force_delete = true
   encryption_configuration {
     encryption_type = var.encrypt
-    kms_key = aws_kms_key.ecr_kms_arn.arn
+    kms_key = aws_kms_key.ecr_kms_key.arn
   }
   tags = {
     "CreatedBy" = "Terraform"
@@ -155,7 +155,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   encryption_config {
     provider {
-      key_arn = var.eks_kms_arn
+      key_arn = aws_kms_key.eks_kms_key.arn
     }
     resources = ["secrets"]
   }
@@ -169,7 +169,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     "CreatedBy" = "Terraform"
     "auto-delete" = "no"
   }
-  depends_on = [ aws_iam_role.eks_cluster_role, aws_kms_key.eks_kms_arn ]
+  depends_on = [ aws_iam_role.eks_cluster_role, aws_kms_key.eks_kms_key ]
 }
 
 resource "aws_iam_role" "eks_cluster_role" {
@@ -290,7 +290,7 @@ locals {
 
 resource "aws_iam_role_policy_attachment" "attach_multiple" {
   for_each   = toset(local.policy_arns_ng)
-  role       = aws_iam_role.eks_node_group_role.name
+  role       = aws_iam_role.eks_cs_node_group_role.name
   policy_arn = each.value
 }
 
