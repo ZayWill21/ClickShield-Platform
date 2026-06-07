@@ -28,6 +28,7 @@ jobs:
       TF_VAR_eks_kms_arn: ${{ secrets.EKS_KMS_ARN }}
       TF_VAR_vpc_flow_logs_role: ${{ secrets.VPC_FLOW_LOGS_ROLE }}
       TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+      TF_VAR_Access_Key_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:

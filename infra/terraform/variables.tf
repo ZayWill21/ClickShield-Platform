@@ -60,3 +60,8 @@ variable "vpc_flow_logs_role" {
   type = string
   description = "The ARN of the IAM role for VPC flow logs"
 }
+
+# variable "Access_Key_ID" {
+#   type = string
+#   description = "AWS Access Key ID for GitHub Actions"
+# }

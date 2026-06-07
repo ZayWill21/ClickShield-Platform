@@ -60,3 +60,8 @@ variable "private_subnet_ids" {
   type        = list(string)
   description = "List of private subnet IDs"
 }
+
+# variable "Access_Key_ID" {
+#   type = string
+#   description = "AWS Access Key ID for GitHub Actions"
+# }

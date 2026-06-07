@@ -24,15 +24,39 @@ resource "aws_kms_key" "ecr_kms_key" {
     "Version": "2012-10-17",
     "Id": "auto-ecr-1",
     "Statement": [
-        {
-          "Sid": "Enable IAM User Permissions",
-          "Effect": "Allow",
-          "Principal": {
-            "AWS": "arn:aws:iam::${var.aws_account_id}:root"
+          {
+            "Sid": "Enable IAM User Permissions",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "arn:aws:iam::${var.aws_account_id}:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
           },
-          "Action": "kms:*",
-          "Resource": "*"
-        },  
+          {
+            "Sid": "Allow access for Key Administrators",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": ["arn:aws:iam::${var.aws_account_id}:role/GitHub_Actions_Role"]
+            },
+            "Action": [
+              "kms:Create*",
+              "kms:Describe*",
+              "kms:Enable*",
+              "kms:List*",
+              "kms:Put*",
+              "kms:Update*",
+              "kms:Revoke*",
+              "kms:Disable*",
+              "kms:Get*",
+              "kms:Delete*",
+              "kms:TagResource",
+              "kms:UntagResource",
+              "kms:ScheduleKeyDeletion",
+              "kms:CancelKeyDeletion"
+            ],
+            "Resource": "*"
+          },
         {
           "Sid": "Allow access through Amazon ECR for all principals in the account that are authorized to use Amazon ECR",
           "Effect": "Allow",
@@ -69,7 +93,22 @@ resource "aws_kms_key" "ecr_kms_key" {
             "kms:RevokeGrant"
           ],
           "Resource": "*"
-        }
+        },
+        {
+          "Sid": "Allow use of the key",
+          "Effect": "Allow",
+          "Principal": {
+          "AWS": "arn:aws:iam::${var.aws_account_id}:role/KeyUser"
+          },
+          "Action": [
+           "kms:Encrypt",
+           "kms:Decrypt",
+           "kms:ReEncrypt*",
+           "kms:GenerateDataKey*",
+           "kms:DescribeKey"
+           ],
+            "Resource": "*"
+        },
       ]
   })
 }
@@ -96,7 +135,7 @@ resource "aws_kms_key" "eks_kms_key" {
             "Sid": "Allow access for Key Administrators",
             "Effect": "Allow",
             "Principal": {
-              "AWS": aws_iam_role.eks_cluster_role.arn
+              "AWS": ["arn:aws:iam::${var.aws_account_id}:role/GitHub_Actions_Role"]
             },
             "Action": [
               "kms:Create*",
