@@ -23,3 +23,7 @@ output "public_subnet_cidrs" {
   description = "CIDR blocks of the public subnets"
   value       = values(aws_subnet.public_subnets)[*].cidr_block
 }
+
+output "flow_logs" {
+  value = aws_flow_log.vpc_flow_logs.arn
+}
