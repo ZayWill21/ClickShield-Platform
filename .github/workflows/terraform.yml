@@ -73,7 +73,11 @@ jobs:
       id: validate
       run: terraform validate 
       working-directory: ./infra/terraform
-    
+
+    - name: Terraform Debug state
+      run: terraform state list
+      working-directory: ./infra/terraform
+
     - name: Terraform state rm
       id: remove
       run: |
@@ -94,6 +98,6 @@ jobs:
       working-directory: ./infra/terraform
 
     #  On push to "main", build or change infrastructure according to Terraform configuration files
-    - name: Terraform Apply
-      run: terraform apply -auto-approve 
-      working-directory: ./infra/terraform
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve 
+    #   working-directory: ./infra/terraform

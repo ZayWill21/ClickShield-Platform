@@ -256,15 +256,15 @@ resource "aws_eks_addon" "amazon-ebs-csi-driver" {
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
-# resource "aws_kms_key" "ecr_kms_arn" {
-#   description = "KMS key for ECR encryption"
-#   deletion_window_in_days = 30
-# }
+resource "aws_kms_key" "ecr_kms_arn" {
+  description = "KMS key for ECR encryption"
+  deletion_window_in_days = 30
+}
 
-# resource "aws_kms_key" "eks_kms_arn" {
-#   description = "KMS key for EKS encryption"
-#   deletion_window_in_days = 30
-# }
+resource "aws_kms_key" "eks_kms_arn" {
+  description = "KMS key for EKS encryption"
+  deletion_window_in_days = 30
+}
 
 
 
