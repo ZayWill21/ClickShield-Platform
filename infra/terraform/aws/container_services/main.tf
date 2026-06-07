@@ -146,7 +146,7 @@ resource "aws_kms_key" "eks_kms_key" {
 # 3. Deploy EKS Cluster for Container Orchestration
 resource "aws_eks_cluster" "eks_cluster" {
   name    = "clickshield-eks-cluster"
-  version = "1.35"
+  version = "1.36"
   role_arn = aws_iam_role.eks_cluster_role.arn
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   access_config {
@@ -215,7 +215,7 @@ resource "aws_eks_addon" "vpc-cni" {
 resource "aws_eks_addon" "kube-proxy" {
   cluster_name = aws_eks_cluster.eks_cluster.name
   addon_name   = "kube-proxy"
-  addon_version = "v1.35.3-eksbuild.11"
+  addon_version = "v1.36.1-eksbuild.11"
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
@@ -255,18 +255,6 @@ resource "aws_eks_addon" "amazon-ebs-csi-driver" {
   addon_version = "v1.60.1-eksbuild.1"
   resolve_conflicts_on_create = "OVERWRITE"
 }
-
-resource "aws_kms_key" "ecr_kms_arn" {
-  description = "KMS key for ECR encryption"
-  deletion_window_in_days = 30
-}
-
-resource "aws_kms_key" "eks_kms_arn" {
-  description = "KMS key for EKS encryption"
-  deletion_window_in_days = 30
-}
-
-
 
 # **************************Add GuardDuty, Fluentbit, Secrets Store CSI Driver, Prometheus Node Exporter and other add-ons as needed**************************
 
