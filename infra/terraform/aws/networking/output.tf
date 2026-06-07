@@ -24,10 +24,10 @@ output "public_subnet_cidrs" {
   value       = values(aws_subnet.public_subnets)[*].cidr_block
 }
 
-output "flow_logs" {
-  value = aws_flow_log.flow_logs.arn
+output "flow_log_arn" {
+  value = aws_flow_log.flow_log.arn
 }
 
 output "flow_log_role" {
-  value = aws_iam_role.flow_logs_role.arn
+  value = aws_iam_role.vpc_flow_logs_role.arn
 }
