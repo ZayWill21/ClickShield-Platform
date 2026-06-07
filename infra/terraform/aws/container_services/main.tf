@@ -20,6 +20,7 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
 resource "aws_kms_key" "ecr_kms_key" {
   enable_key_rotation     = true
   description = "KMS key for encrypting ECR repository"
+  depends_on = [ aws_ecr_repository.ecr_clickshield_platform_repo ]
   policy = jsonencode({
     "Version": "2012-10-17",
     "Id": "auto-ecr-1",
@@ -37,7 +38,7 @@ resource "aws_kms_key" "ecr_kms_key" {
             "Sid": "Allow access for Key Administrators",
             "Effect": "Allow",
             "Principal": {
-              "AWS": ["arn:aws:iam::${var.aws_account_id}:role/GitHub_Actions_Role"]
+              "AWS": "arn:aws:iam::${var.aws_account_id}:role/GitHub_Actions_Role"
             },
             "Action": [
               "kms:Create*",
@@ -98,7 +99,7 @@ resource "aws_kms_key" "ecr_kms_key" {
           "Sid": "Allow use of the key",
           "Effect": "Allow",
           "Principal": {
-          "AWS": "arn:aws:iam::${var.aws_account_id}:role/KeyUser"
+          "AWS": aws_ecr_repository.ecr_clickshield_platform_repo.arn
           },
           "Action": [
            "kms:Encrypt",
