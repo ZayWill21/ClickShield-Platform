@@ -25,5 +25,9 @@ output "public_subnet_cidrs" {
 }
 
 output "flow_logs" {
-  value = aws_flow_log.vpc_flow_logs.arn
+  value = aws_flow_log.flow_logs.arn
+}
+
+output "flow_log_role" {
+  value = aws_iam_role.flow_logs_role.arn
 }
