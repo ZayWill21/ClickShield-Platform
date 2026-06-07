@@ -224,6 +224,7 @@ resource "aws_eks_addon" "coredns" {
   addon_name   = "coredns"
   addon_version = "v1.14.3-eksbuild.2"
   resolve_conflicts_on_create = "OVERWRITE"
+  depends_on = [ aws_eks_addon.vpc-cni ]
 }
 
 resource "aws_eks_addon" "eks-pod-identity-agent" {
@@ -231,6 +232,7 @@ resource "aws_eks_addon" "eks-pod-identity-agent" {
   addon_name   = "eks-pod-identity-agent"
   addon_version = "v1.3.10-eksbuild.3"
   resolve_conflicts_on_create = "OVERWRITE"
+  depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy]
 }
 
 resource "aws_eks_addon" "cloudwatch-observability" {
