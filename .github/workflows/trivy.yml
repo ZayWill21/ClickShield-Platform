@@ -40,7 +40,7 @@ jobs:
           REPOSITORY: clickshield-platform-repo
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG . # this builds an image of my application using the Dockerfile in the root of the repository and tags it with the current commit SHA
+          docker build -t first_image . # $REGISTRY/$REPOSITORY:$IMAGE_TAG . # this builds an image of my application using the Dockerfile in the root of the repository and tags it with the current commit SHA
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
@@ -50,8 +50,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         with:
           image-ref: '${{env.REGISTRY}}/${{env.REPOSITORY}}:${{env.IMAGE_TAG}}' #  this scans the image we just built
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
+          format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
           exit-code: '0' # ensures that the Trivy scan step does not fail even if vulnerabilities are found, so that the SARIF file can be uploaded to the GitHub Security tab in the next step

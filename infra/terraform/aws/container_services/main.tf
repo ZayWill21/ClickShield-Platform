@@ -14,6 +14,7 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
     "CreatedBy" = "Terraform"
     "auto-delete" = "no"
   }
+  
 }
 
 # 2. KMS Key for ECR Encryption
@@ -38,7 +39,7 @@ resource "aws_kms_key" "ecr_kms_key" {
             "Sid": "Allow access for Key Administrators",
             "Effect": "Allow",
             "Principal": {
-              "AWS": "arn:aws:iam::${var.aws_account_id}:role/GitHub_Actions_Role"
+              "AWS": ["arn:aws:iam::${var.aws_account_id}:role/GitHub_Actions_Role"]
             },
             "Action": [
               "kms:Create*",
@@ -265,7 +266,7 @@ resource "aws_eks_addon" "vpc-cni" {
 resource "aws_eks_addon" "kube-proxy" {
   cluster_name = aws_eks_cluster.eks_cluster.name
   addon_name   = "kube-proxy"
-  addon_version = "v1.36.1-eksbuild.11"
+  addon_version = "v1.36.0-eksbuild.7"
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
@@ -274,7 +275,7 @@ resource "aws_eks_addon" "coredns" {
   addon_name   = "coredns"
   addon_version = "v1.14.3-eksbuild.2"
   resolve_conflicts_on_create = "OVERWRITE"
-  depends_on = [ aws_eks_addon.vpc-cni ]
+  depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy, aws_eks_node_group.compute ]
 }
 
 resource "aws_eks_addon" "eks-pod-identity-agent" {
@@ -289,45 +290,77 @@ resource "aws_eks_addon" "cloudwatch-observability" {
   cluster_name = aws_eks_cluster.eks_cluster.name
   addon_name   = "amazon-cloudwatch-observability"
   addon_version = "v6.1.0-eksbuild.1"
+  depends_on = [ aws_eks_node_group.compute ]
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
 resource "aws_eks_addon" "metrics-server" {
   cluster_name = aws_eks_cluster.eks_cluster.name
   addon_name   = "metrics-server"
+  depends_on = [ aws_eks_node_group.compute ]
   addon_version = "v0.8.1-eksbuild.10"
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
-resource "aws_eks_addon" "amazon-ebs-csi-driver" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "amazon-ebs-csi-driver"
-  addon_version = "v1.60.1-eksbuild.1"
-  resolve_conflicts_on_create = "OVERWRITE"
-}
 
-# **************************Add GuardDuty, Fluentbit, Secrets Store CSI Driver, Prometheus Node Exporter and other add-ons as needed**************************
+# module "eks_blueprints_addons" {
+#   source = "aws-ia/eks-blueprints-addons/aws"
+#   version = "~> 1.0" #ensure to update this to the latest/desired version
 
+#   cluster_name      = module.container_services.cluster_name
+#   cluster_endpoint  = module.container_services.cluster_endpoint
+#   cluster_version   = module.container_services.cluster_version
+#   oidc_provider_arn = module.container_services.oidc_provider_arn
 
-data "aws_ssm_parameter" "eks_ami_release_version" {
-  name = "/aws/service/eks/optimized-ami/${aws_eks_cluster.eks_cluster.version}/amazon-linux-2023/x86_64/standard/recommended/release_version"
-}
+#   eks_addons = {
+#     aws-ebs-csi-driver = {
+#       most_recent = true
+#     }
+#   }
+
+#   enable_aws_load_balancer_controller    = true
+#   enable_cluster_proportional_autoscaler = true
+#   enable_karpenter                       = true
+# }
+
+# module "aws_ebs_csi_pod_identity" {
+#   source = "terraform-aws-modules/eks-pod-identity/aws"
+
+#   name = "aws-ebs-csi"
+
+#   attach_aws_ebs_csi_policy = true
+#   aws_ebs_csi_kms_arns      = ["arn:aws:kms:*:*:key/1234abcd-12ab-34cd-56ef-1234567890ab"]
+
+#   associations = {
+#     this = {
+#       cluster_name    = "example"
+#       namespace       = "kube-system"
+#       service_account = "ebs-csi-controller-sa"
+#     }
+#   }
+
+#   tags = {
+#     Environment = "dev"
+#   }
+# }
+
+#**************************Add GuardDuty, Fluentbit, Secrets Store CSI Driver, Prometheus Node Exporter and other add-ons as needed**************************
 
 resource "aws_iam_role" "eks_cs_node_group_role" {
   name = "eks_cs_node_group_role"
   description = "IAM role for EKS node group"
   assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Principal": {
-                "Service": "ec2.amazonaws.com"
-            },
-            "Action": "sts:AssumeRole"
-        }
-    ]
-})
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Principal": {
+                  "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+          }
+      ]
+  })
 }
 
 locals {
@@ -351,7 +384,6 @@ resource "aws_eks_node_group" "compute" {
   node_group_name = "compute"
   cluster_name = aws_eks_cluster.eks_cluster.name
   node_role_arn = aws_iam_role.eks_cs_node_group_role.arn
-  release_version = data.aws_ssm_parameter.eks_ami_release_version.value
   ami_type = "AL2023_x86_64_STANDARD"
   instance_types = ["t3.large"]
   scaling_config {
