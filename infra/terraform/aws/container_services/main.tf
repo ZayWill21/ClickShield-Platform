@@ -21,58 +21,9 @@ resource "aws_kms_key" "ecr_kms_key" {
   enable_key_rotation     = true
   description = "KMS key for encrypting ECR repository"
   policy = jsonencode({
-  "Version": "2012-10-17",
-  "Id": "auto-ecr-1",
-  "Statement": [
-    {
-      "Sid": "Allow access through Amazon ECR for all principals in the account that are authorized to use Amazon ECR",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "*"
-      },
-      "Action": [
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:ReEncrypt*",
-        "kms:GenerateDataKey*",
-        "kms:CreateGrant",
-        "kms:DescribeKey",
-        "kms:RetireGrant"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "StringEquals": {
-          "kms:CallerAccount": var.aws_account_id
-          "kms:ViaService": "ecr.${var.AWS_REGION}.amazonaws.com"
-        }
-      }
-    },
-    {
-      "Sid": "Allow direct access to key metadata to the account",
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "arn:aws:iam::${var.aws_account_id}:root"
-      },
-      "Action": [
-        "kms:Describe*",
-        "kms:Get*",
-        "kms:List*",
-        "kms:RevokeGrant"
-      ],
-      "Resource": "*"
-    }
-  ]
-})
-}
-
-# 3. KMS Key for EKS Cluster Encryption
-resource "aws_kms_key" "eks_kms_key" {
-    description = "KMS key for encrypting EKS cluster"
-    enable_key_rotation     = true
-    policy = jsonencode({
-      "Id": "key-consolepolicy-3",
-      "Version": "2012-10-17",
-      "Statement": [
+    "Version": "2012-10-17",
+    "Id": "auto-ecr-1",
+    "Statement": [
         {
           "Sid": "Enable IAM User Permissions",
           "Effect": "Allow",
@@ -81,65 +32,124 @@ resource "aws_kms_key" "eks_kms_key" {
           },
           "Action": "kms:*",
           "Resource": "*"
-        },
+        },  
         {
-          "Sid": "Allow access for Key Administrators",
+          "Sid": "Allow access through Amazon ECR for all principals in the account that are authorized to use Amazon ECR",
           "Effect": "Allow",
           "Principal": {
-            "AWS": "arn:aws:iam::${var.aws_account_id}:role/${aws_iam_role.eks_cluster_role.name}"
-          },
-          "Action": [
-            "kms:Create*",
-            "kms:Describe*",
-            "kms:Enable*",
-            "kms:List*",
-            "kms:Put*",
-            "kms:Update*",
-            "kms:Revoke*",
-            "kms:Disable*",
-            "kms:Get*",
-            "kms:Delete*",
-            "kms:TagResource",
-            "kms:UntagResource",
-            "kms:ScheduleKeyDeletion",
-            "kms:CancelKeyDeletion"
-          ],
-          "Resource": "*"
-        },
-        {
-          "Sid": "Allow use of the key",
-          "Effect": "Allow",
-          "Principal": {
-            "AWS": "arn:aws:iam::${var.aws_account_id}:role/AmazonEKSClusterRole"
+            "AWS": "*"
           },
           "Action": [
             "kms:Encrypt",
             "kms:Decrypt",
             "kms:ReEncrypt*",
-            "kms:DescribeKey",
-            "kms:GetPublicKey"
-          ],
-          "Resource": "*"
-        },
-        {
-          "Sid": "Allow attachment of persistent resources",
-          "Effect": "Allow",
-          "Principal": {
-            "AWS": "arn:aws:iam::${var.aws_account_id}:role/AmazonEKSClusterRole"
-          },
-          "Action": [
+            "kms:GenerateDataKey*",
             "kms:CreateGrant",
-            "kms:ListGrants",
-            "kms:RevokeGrant"
+            "kms:DescribeKey",
+            "kms:RetireGrant"
           ],
           "Resource": "*",
           "Condition": {
-            "Bool": {
-              "kms:GrantIsForAWSResource": "true"
+            "StringEquals": {
+              "kms:CallerAccount": var.aws_account_id
+              "kms:ViaService": "ecr.${var.AWS_REGION}.amazonaws.com"
             }
           }
+        },
+        {
+          "Sid": "Allow direct access to key metadata to the account",
+          "Effect": "Allow",
+          "Principal": {
+            "AWS": "arn:aws:iam::${var.aws_account_id}:root"
+          },
+          "Action": [
+            "kms:Describe*",
+            "kms:Get*",
+            "kms:List*",
+            "kms:RevokeGrant"
+          ],
+          "Resource": "*"
         }
       ]
+  })
+}
+
+# 3. KMS Key for EKS Cluster Encryption
+resource "aws_kms_key" "eks_kms_key" {
+    description = "KMS key for encrypting EKS cluster"
+    enable_key_rotation     = true
+      depends_on = [aws_iam_role.eks_cluster_role]
+    policy = jsonencode({
+      "Id": "key-consolepolicy-3",
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+            "Sid": "Enable IAM User Permissions",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "arn:aws:iam::${var.aws_account_id}:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+          },
+          {
+            "Sid": "Allow access for Key Administrators",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": aws_iam_role.eks_cluster_role.arn
+            },
+            "Action": [
+              "kms:Create*",
+              "kms:Describe*",
+              "kms:Enable*",
+              "kms:List*",
+              "kms:Put*",
+              "kms:Update*",
+              "kms:Revoke*",
+              "kms:Disable*",
+              "kms:Get*",
+              "kms:Delete*",
+              "kms:TagResource",
+              "kms:UntagResource",
+              "kms:ScheduleKeyDeletion",
+              "kms:CancelKeyDeletion"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Sid": "Allow use of the key",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": aws_iam_role.eks_cluster_role.arn
+            },
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:DescribeKey",
+              "kms:GetPublicKey"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Sid": "Allow attachment of persistent resources",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": aws_iam_role.eks_cluster_role.arn
+            },
+            "Action": [
+              "kms:CreateGrant",
+              "kms:ListGrants",
+              "kms:RevokeGrant"
+            ],
+            "Resource": "*",
+            "Condition": {
+              "Bool": {
+                "kms:GrantIsForAWSResource": "true"
+              }
+            }
+          }
+        ]
     })
   }
 

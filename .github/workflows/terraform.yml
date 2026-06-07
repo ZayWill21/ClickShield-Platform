@@ -78,13 +78,12 @@ jobs:
       run: terraform state list
       working-directory: ./infra/terraform
 
-    - name: Terraform state rm
-      id: remove
-      run: |
-        terraform state rm module.container_services.aws_kms_key.eks_kms_arn
-        terraform state rm module.container_services.aws_kms_key.ecr_kms_arn
-
-      working-directory: ./infra/terraform
+    # - name: Terraform state rm
+    #   id: remove
+    #   run: |
+    #     terraform state rm module.container_services.aws_kms_key.eks_kms_arn
+    #     terraform state rm module.container_services.aws_kms_key.ecr_kms_arn
+    #   working-directory: ./infra/terraform
     
     - name: Terraform Debug Plan
       run: terraform plan 2>&1 | grep -A2 vpc_flow_logs_role
