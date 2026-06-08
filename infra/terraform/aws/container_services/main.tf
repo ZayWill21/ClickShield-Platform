@@ -95,22 +95,7 @@ resource "aws_kms_key" "ecr_kms_key" {
             "kms:RevokeGrant"
           ],
           "Resource": "*"
-        },
-        {
-          "Sid": "Allow use of the key",
-          "Effect": "Allow",
-          "Principal": {
-          "AWS": aws_ecr_repository.ecr_clickshield_platform_repo.arn
-          },
-          "Action": [
-           "kms:Encrypt",
-           "kms:Decrypt",
-           "kms:ReEncrypt*",
-           "kms:GenerateDataKey*",
-           "kms:DescribeKey"
-           ],
-            "Resource": "*"
-        },
+        }
       ]
   })
 }
