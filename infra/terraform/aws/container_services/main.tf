@@ -21,7 +21,6 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
 resource "aws_kms_key" "ecr_kms_key" {
   enable_key_rotation     = true
   description = "KMS key for encrypting ECR repository"
-  depends_on = [ aws_ecr_repository.ecr_clickshield_platform_repo ]
   policy = jsonencode({
     "Version": "2012-10-17",
     "Id": "auto-ecr-1",
