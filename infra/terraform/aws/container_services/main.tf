@@ -8,7 +8,7 @@ resource "aws_ecr_repository" "ecr_clickshield_platform_repo" {
   force_delete = true
   encryption_configuration {
     encryption_type = var.encrypt
-    # kms_key = aws_kms_key.ecr_kms_key.arn
+    kms_key = aws_kms_key.ecr_kms_key.arn
   }
   tags = {
     "CreatedBy" = "Terraform"

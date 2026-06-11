@@ -1,20 +1,23 @@
+
 # ---------- clone ----------
-RUN git clone https://github.com/tbhvishal/ClickShield.git /tmp/src && cd /tmp/src && git checkout "$CLICKSHIELD_REF" && cp -r /tmp/src/backend/. /app/ && rm -rf /tmp/src
+FROM alpine/git AS source
+ARG CLICKSHIELD_REF
+WORKDIR /src
+RUN git clone https://github.com/tbhvishal/ClickShield.git .  && git checkout "${CLICKSHIELD_REF}"
 
 # ---------- build ----------
 FROM node:20-alpine AS build
 WORKDIR /app
 
-COPY package*.json ./
+COPY --from=source /src/backend/package*.json ./RUN npm ci
 RUN npm ci
-
-COPY . .
+COPY --from=source /src/backend/ ./
 RUN npm run build              # tsc -> /app/dist
 
-# ---------- deps (prod only) ----------
+# ---------- deps ----------
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
+COPY --from=source /src/backend/package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 # ---------- runtime ----------
@@ -28,11 +31,14 @@ COPY --from=build /app/dist          ./dist
 COPY package*.json ./
 
 # Drop privileges
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=8001
+COPY --from=deps   /app/node_modules ./node_modules
+COPY --from=build  /app/dist          ./dist
+COPY --from=source /src/backend/package*.json ./
 RUN chown -R node:node /app
 USER node
-
 EXPOSE 8001
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
-  CMD wget -qO- http://127.0.0.1:8001/api/check-url > /dev/null 2>&1 || exit 1
-
 CMD ["node", "dist/server.js"]
