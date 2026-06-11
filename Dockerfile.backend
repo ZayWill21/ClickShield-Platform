@@ -1,11 +1,8 @@
 # ---------- clone ----------
-RUN apk add --no-cache git \
- && git clone https://github.com/tbhvishal/ClickShield.git /tmp/src \
- && cd /tmp/src && git checkout "$CLICKSHIELD_REF" \
- && cp -r /tmp/src/backend/. /app/ && rm -rf /tmp/src
+RUN git clone https://github.com/tbhvishal/ClickShield.git /tmp/src && cd /tmp/src && git checkout "$CLICKSHIELD_REF" && cp -r /tmp/src/backend/. /app/ && rm -rf /tmp/src
 
 # ---------- build ----------
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
@@ -15,7 +12,7 @@ COPY . .
 RUN npm run build              # tsc -> /app/dist
 
 # ---------- deps (prod only) ----------
-FROM node:18-alpine AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
