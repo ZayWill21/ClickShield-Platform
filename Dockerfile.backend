@@ -7,7 +7,7 @@ RUN git clone https://github.com/tbhvishal/ClickShield.git .  && git checkout "m
 FROM node:20-alpine AS build
 WORKDIR /app
 
-COPY --from=source /src/backend/package*.json ./RUN npm ci
+COPY --from=source /src/backend/package*.json ./
 RUN npm ci
 COPY --from=source /src/backend/ ./
 RUN npm run build              # tsc -> /app/dist
@@ -19,16 +19,6 @@ COPY --from=source /src/backend/package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 # ---------- runtime ----------
-FROM node:18-alpine AS runtime
-WORKDIR /app
-ENV NODE_ENV=production \
-    PORT=8001
-
-COPY --from=deps  /app/node_modules ./node_modules
-COPY --from=build /app/dist          ./dist
-COPY package*.json ./
-
-# Drop privileges
 FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
