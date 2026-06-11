@@ -6,6 +6,7 @@ resource "aws_vpc" "vpc_main" {
   tags = {
     "CreatedBy" = "Terraform"
     "auto-delete" = "no"
+    "Name" = "clickshield-vpc"
   }
 }
 

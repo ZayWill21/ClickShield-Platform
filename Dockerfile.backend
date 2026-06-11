@@ -1,3 +1,9 @@
+# ---------- clone ----------
+RUN apk add --no-cache git \
+ && git clone https://github.com/tbhvishal/ClickShield.git /tmp/src \
+ && cd /tmp/src && git checkout "$CLICKSHIELD_REF" \
+ && cp -r /tmp/src/backend/. /app/ && rm -rf /tmp/src
+
 # ---------- build ----------
 FROM node:18-alpine AS build
 WORKDIR /app
@@ -22,7 +28,7 @@ ENV NODE_ENV=production \
 
 COPY --from=deps  /app/node_modules ./node_modules
 COPY --from=build /app/dist          ./dist
-COPY package.json ./
+COPY package*.json ./
 
 # Drop privileges
 RUN chown -R node:node /app
