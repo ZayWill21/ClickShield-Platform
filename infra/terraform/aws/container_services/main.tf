@@ -254,37 +254,37 @@ resource "aws_eks_addon" "kube-proxy" {
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
-# resource "aws_eks_addon" "coredns" {
-#   cluster_name = aws_eks_cluster.eks_cluster.name
-#   addon_name   = "coredns"
-#   addon_version = "v1.14.3-eksbuild.2"
-#   resolve_conflicts_on_create = "OVERWRITE"
-#   depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy, aws_eks_node_group.compute ]
-# }
+resource "aws_eks_addon" "coredns" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "coredns"
+  addon_version = "v1.14.3-eksbuild.2"
+  resolve_conflicts_on_create = "OVERWRITE"
+  depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy, aws_eks_node_group.compute ]
+}
 
-# resource "aws_eks_addon" "eks-pod-identity-agent" {
-#   cluster_name = aws_eks_cluster.eks_cluster.name
-#   addon_name   = "eks-pod-identity-agent"
-#   addon_version = "v1.3.10-eksbuild.3"
-#   resolve_conflicts_on_create = "OVERWRITE"
-#   depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy]
-# }
+resource "aws_eks_addon" "eks-pod-identity-agent" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "eks-pod-identity-agent"
+  addon_version = "v1.3.10-eksbuild.3"
+  resolve_conflicts_on_create = "OVERWRITE"
+  depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy]
+}
 
-# resource "aws_eks_addon" "cloudwatch-observability" {
-#   cluster_name = aws_eks_cluster.eks_cluster.name
-#   addon_name   = "amazon-cloudwatch-observability"
-#   addon_version = "v6.1.0-eksbuild.1"
-#   depends_on = [ aws_eks_node_group.compute ]
-#   resolve_conflicts_on_create = "OVERWRITE"
-# }
+resource "aws_eks_addon" "cloudwatch-observability" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "amazon-cloudwatch-observability"
+  addon_version = "v6.1.0-eksbuild.1"
+  depends_on = [ aws_eks_node_group.compute ]
+  resolve_conflicts_on_create = "OVERWRITE"
+}
 
-# resource "aws_eks_addon" "metrics-server" {
-#   cluster_name = aws_eks_cluster.eks_cluster.name
-#   addon_name   = "metrics-server"
-#   depends_on = [ aws_eks_node_group.compute ]
-#   addon_version = "v0.8.1-eksbuild.10"
-#   resolve_conflicts_on_create = "OVERWRITE"
-# }
+resource "aws_eks_addon" "metrics-server" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "metrics-server"
+  depends_on = [ aws_eks_node_group.compute ]
+  addon_version = "v0.8.1-eksbuild.10"
+  resolve_conflicts_on_create = "OVERWRITE"
+}
 
 
 # module "eks_blueprints_addons" {
@@ -364,22 +364,22 @@ resource "aws_iam_role_policy_attachment" "attach_multiple" {
 }
 
 # 4. Deploy EKS Node Group for Worker Nodes
-# resource "aws_eks_node_group" "compute" {
-#   node_group_name = "compute"
-#   cluster_name = aws_eks_cluster.eks_cluster.name
-#   node_role_arn = aws_iam_role.eks_cs_node_group_role.arn
-#   ami_type = "AL2023_x86_64_STANDARD"
-#   instance_types = ["t3.large"]
-#   scaling_config {
-#     desired_size = 1
-#     max_size = 2
-#     min_size = 1
-#   }
-#   disk_size = 30
-#   subnet_ids = var.private_subnet_ids
-#   depends_on = [ aws_iam_role.eks_cs_node_group_role, aws_eks_addon.kube-proxy, aws_eks_addon.vpc-cni ]
-#   tags = {
-#     "CreatedBy" = "Terraform"
-#     "auto-delete" = "no"
-#     }
-# }
+resource "aws_eks_node_group" "compute" {
+  node_group_name = "compute"
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  node_role_arn = aws_iam_role.eks_cs_node_group_role.arn
+  ami_type = "AL2023_x86_64_STANDARD"
+  instance_types = ["t3.large"]
+  scaling_config {
+    desired_size = 1
+    max_size = 2
+    min_size = 1
+  }
+  disk_size = 30
+  subnet_ids = var.private_subnet_ids
+  depends_on = [ aws_iam_role.eks_cs_node_group_role, aws_eks_addon.kube-proxy, aws_eks_addon.vpc-cni ]
+  tags = {
+    "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
+    }
+}

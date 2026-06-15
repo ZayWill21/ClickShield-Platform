@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickshield-frontend
+  labels:
+    app: clickshield-frontend
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+      app: clickshield-frontend
+  template:
+    metadata:
+      labels:
+        app: clickshield-frontend
+    spec:
+      containers:
+        - name: clickshield-frontend
+          image: FRONTEND_IMAGE
+          ports:
+            - containerPort: 80 #Nginx listens on 80
+          resource:
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+            requests:
+              cpu: "250m"
+              memory: "128Mi"

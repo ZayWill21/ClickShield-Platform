@@ -6,7 +6,6 @@ permissions:
   id-token: write
   contents: read
 env:
-  ECR_REPOSITORY: 
   EKS_CLUSTER_NAME:  clickshield-eks-cluster
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -42,9 +41,10 @@ jobs:
   
       # - name: Deploy to EKS 
       #   env:
-      #     ECR_REGISTRY:  ${{ steps.login-ecr.outputs.registry }} 
+      #     REGISTRY:  ${{ steps.login-ecr.outputs.registry }} 
+      #     REPOSITORY: clickshield-platform-repo
       #     IMAGE_TAG: ${{ steps.commit.outputs.short }}
       #   run: | 
-      #     sed -i.bak "s|DOCKER_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" manifests/app-deploy.yaml && \
+      #     sed -i.bak "s|FRONTEND_IMAGE|$REGISTRY/$REPOSITORY:$IMAGE_TAG|g" manifests/app-deploy.yaml && \
       #     kubectl apply -f manifests/app-deploy.yaml 
       #     kubectl apply -f manifests/app-service.yaml 
