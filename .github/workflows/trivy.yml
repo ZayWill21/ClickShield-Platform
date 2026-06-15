@@ -57,6 +57,7 @@ jobs:
         if: always() # ensures that the SARIF file is uploaded even if the Trivy scan fails (e.g. if vulnerabilities are found)
         with:
           sarif_file: 'trivy-backend.sarif'
+          category: 'Trivy Backend Scan' # this will show up in the GitHub Security tab to differentiate from other scans
 
       - name: Trivy Backend Scan (gate)
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
@@ -90,6 +91,7 @@ jobs:
         if: always() # ensures that the SARIF file is uploaded even if the Trivy scan fails (e.g. if vulnerabilities are found)
         with:
           sarif_file: 'trivy-frontend.sarif'
+          category: 'Trivy Frontend Scan' # this will show up in the GitHub Security tab to differentiate from other scans
 
       - name: Trivy Frontend Scan (gate)
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
