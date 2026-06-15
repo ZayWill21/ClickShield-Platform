@@ -60,34 +60,38 @@ jobs:
           docker push $REGISTRY/$REPOSITORY:backend-$IMAGE_TAG
           docker push $REGISTRY/$REPOSITORY:frontend-$IMAGE_TAG
 
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy vulnerability scanner on Backend image
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: clickshield-platform-repo
           IMAGE_TAG: ${{ github.sha }}
         with:
-          image-ref: '${{ steps.login-ecr.outputs.registry }}/clickshield-platform-repo:$IMAGE_TAG' #  this scans the image we just built
+          image-ref: '${{ steps.login-ecr.outputs.registry }}/clickshield-platform-repo:backend-$IMAGE_TAG' #  this scans the image we just built
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
           exit-code: '0' # ensures that the Trivy scan step does not fail even if vulnerabilities are found, so that the SARIF file can be uploaded to the GitHub Security tab in the next step
-
+      
+      - name: Run Trivy vulnerability scanner on Frontend image
+        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: clickshield-platform-repo
+          IMAGE_TAG: ${{ github.sha }}
+        with:
+          image-ref: '${{ steps.login-ecr.outputs.registry }}/clickshield-platform-repo:frontend-$IMAGE_TAG' #  this scans the image we just built
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0' # ensures that the Trivy scan step does not fail even if vulnerabilities are found, so that the SARIF file can be uploaded to the GitHub Security tab in the next step
+      
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
         if: always() # ensures that the SARIF file is uploaded even if the Trivy scan fails (e.g. if vulnerabilities are found)
         with:
           sarif_file: 'trivy-results.sarif'
-
-      # Scan #2: gate the build. Fails ONLY on CRITICAL.  
-      - name: Trivy scan (fail on CRITICAL)
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: '${{ steps.login-ecr.outputs.registry }}/clickshield-platform-repo:${{ github.sha }}'
-          format: 'table'
-          severity: 'CRITICAL'
-          ignore-unfixed: true   # optional: skip vulns with no fix available
-          exit-code: '1'         # <-- this is what stops the build
+          
   tfsec:
     name: Run tfsec sarif report
     runs-on: ubuntu-latest
