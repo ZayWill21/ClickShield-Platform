@@ -41,8 +41,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
-          docker build -f Dockerfile.backend -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker build -f Dockerfile.frontend -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker build -f Dockerfile.backend -t $REGISTRY/$REPOSITORY:backend-$IMAGE_TAG .
+          docker build -f Dockerfile.frontend -t $REGISTRY/$REPOSITORY:frontend-$IMAGE_TAG .
 
       # - name: Tag image
       #   env:
@@ -57,8 +57,8 @@ jobs:
           REPOSITORY: clickshield-platform-repo
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:backend-$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:frontend-$IMAGE_TAG
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe

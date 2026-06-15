@@ -254,37 +254,37 @@ resource "aws_eks_addon" "kube-proxy" {
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
-resource "aws_eks_addon" "coredns" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "coredns"
-  addon_version = "v1.14.3-eksbuild.2"
-  resolve_conflicts_on_create = "OVERWRITE"
-  depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy, aws_eks_node_group.compute ]
-}
+# resource "aws_eks_addon" "coredns" {
+#   cluster_name = aws_eks_cluster.eks_cluster.name
+#   addon_name   = "coredns"
+#   addon_version = "v1.14.3-eksbuild.2"
+#   resolve_conflicts_on_create = "OVERWRITE"
+#   depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy, aws_eks_node_group.compute ]
+# }
 
-resource "aws_eks_addon" "eks-pod-identity-agent" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "eks-pod-identity-agent"
-  addon_version = "v1.3.10-eksbuild.3"
-  resolve_conflicts_on_create = "OVERWRITE"
-  depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy]
-}
+# resource "aws_eks_addon" "eks-pod-identity-agent" {
+#   cluster_name = aws_eks_cluster.eks_cluster.name
+#   addon_name   = "eks-pod-identity-agent"
+#   addon_version = "v1.3.10-eksbuild.3"
+#   resolve_conflicts_on_create = "OVERWRITE"
+#   depends_on = [ aws_eks_addon.vpc-cni, aws_eks_addon.kube-proxy]
+# }
 
-resource "aws_eks_addon" "cloudwatch-observability" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "amazon-cloudwatch-observability"
-  addon_version = "v6.1.0-eksbuild.1"
-  depends_on = [ aws_eks_node_group.compute ]
-  resolve_conflicts_on_create = "OVERWRITE"
-}
+# resource "aws_eks_addon" "cloudwatch-observability" {
+#   cluster_name = aws_eks_cluster.eks_cluster.name
+#   addon_name   = "amazon-cloudwatch-observability"
+#   addon_version = "v6.1.0-eksbuild.1"
+#   depends_on = [ aws_eks_node_group.compute ]
+#   resolve_conflicts_on_create = "OVERWRITE"
+# }
 
-resource "aws_eks_addon" "metrics-server" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "metrics-server"
-  depends_on = [ aws_eks_node_group.compute ]
-  addon_version = "v0.8.1-eksbuild.10"
-  resolve_conflicts_on_create = "OVERWRITE"
-}
+# resource "aws_eks_addon" "metrics-server" {
+#   cluster_name = aws_eks_cluster.eks_cluster.name
+#   addon_name   = "metrics-server"
+#   depends_on = [ aws_eks_node_group.compute ]
+#   addon_version = "v0.8.1-eksbuild.10"
+#   resolve_conflicts_on_create = "OVERWRITE"
+# }
 
 
 # module "eks_blueprints_addons" {
