@@ -4,7 +4,7 @@ WORKDIR /src
 RUN git clone https://github.com/tbhvishal/ClickShield.git .  && git checkout "main"
 
 # ---------- build ----------
-FROM node:20-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY --from=source /src/backend/package*.json ./
 RUN npm ci
@@ -12,16 +12,17 @@ COPY --from=source /src/backend/ ./
 RUN npm run build              # tsc -> /app/dist
 
 # ---------- deps ----------
-FROM node:20-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 COPY --from=source /src/backend/package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 # ---------- runtime ----------
-FROM node:20-alpine AS runtime
+FROM node:26-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=8001
+RUN apk update && apk upgrade --no-cache
 COPY --from=deps   /app/node_modules ./node_modules
 COPY --from=build  /app/dist          ./dist
 COPY --from=source /src/backend/package*.json ./
