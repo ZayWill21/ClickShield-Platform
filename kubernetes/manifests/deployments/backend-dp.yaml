@@ -2,35 +2,35 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: clickshield-backend
-  labels: 
+  labels:
     app: clickshield-backend
-spec: 
+spec:
   replicas: 2
   selector:
     matchLabels:
       app: clickshield-backend
-    template:
-      metadata:
-        labels:
-          app: clickshield-backend
-      spec:
-        containers:
-          - name: clickshield-backend
-            image: 298350610133.dkr.ecr.us-east-1.amazonaws.com/clickshield-platform-repo:backend-d0d08ed2c79c159a6747aef414dd723df088f28e
-            ports:
-               - containerPort: 8001
-            env:
-              - name: PORT
-                value: "8001"
-              - name: GOOGLE_SAFE_BROWSING_API_KEY
-                valueFrom:
-                  secretKeyRef:
-                    name: clickshield-secrets
-                    key: GOOGLE_SAFE_BROWSING_API_KEY
-            resources:
-              limits:
-                cpu: "500m"
-                memory: "256Mi"
-              requests:
-                cpu: "250m"
-                memory: "128Mi"
+  template:                       # <-- sibling of selector (2 spaces under spec)
+    metadata:
+      labels:
+        app: clickshield-backend
+    spec:
+      containers:
+        - name: clickshield-backend
+          image: 298350610133.dkr.ecr.us-east-1.amazonaws.com/clickshield-platform-repo:backend-d0d08ed2c79c159a6747aef414dd723df088f28e
+          ports:
+            - containerPort: 8001
+          env:
+            - name: PORT
+              value: "8001"
+            - name: GOOGLE_SAFE_BROWSING_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: clickshield-secrets
+                  key: GOOGLE_SAFE_BROWSING_API_KEY
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+            requests:
+              cpu: "250m"
+              memory: "128Mi"
