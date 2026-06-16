@@ -4,33 +4,33 @@ metadata:
   name: clickshield-backend
   labels: 
     app: clickshield-backend
-  spec: 
-    replicas: 2
-    selector:
-      matchLabels:
-        app: clickshield-backend
-      template:
-        metadata:
-          labels:
-            app: clickshield-backend
-        spec:
-          containers:
-            - name: clickshield-backend
-              image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/clickshield-platform-repo:backend-c1ba7b34943cbdc663de3f45326c4ddaa616f822
-              ports:
-                - containerPort: 8001
-              env:
-                - name: PORT
-                  value: "8001"
-                - name: GOOGLE_SAFE_BROWSING_API_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: clickshield-secrets
-                      key: GOOGLE_SAFE_BROWSING_API_KEY
-              resources:
-                limits:
-                  cpu: "500m"
-                  memory: "256Mi"
-                requests:
-                  cpu: "250m"
-                  memory: "128Mi"
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: clickshield-backend
+    template:
+      metadata:
+        labels:
+          app: clickshield-backend
+      spec:
+        containers:
+          - name: clickshield-backend
+            image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/clickshield-platform-repo:backend-c1ba7b34943cbdc663de3f45326c4ddaa616f822
+            ports:
+               - containerPort: 8001
+            env:
+              - name: PORT
+                value: "8001"
+              - name: GOOGLE_SAFE_BROWSING_API_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: clickshield-secrets
+                    key: GOOGLE_SAFE_BROWSING_API_KEY
+            resources:
+              limits:
+                cpu: "500m"
+                memory: "256Mi"
+              requests:
+                cpu: "250m"
+                memory: "128Mi"
