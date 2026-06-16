@@ -197,7 +197,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   vpc_config {
     endpoint_private_access = true
-    endpoint_public_access  = false
+    endpoint_public_access  = true
     subnet_ids = var.private_subnet_ids
   }
   tags = {
@@ -285,6 +285,14 @@ resource "aws_eks_addon" "metrics-server" {
   addon_version = "v0.8.1-eksbuild.10"
   resolve_conflicts_on_create = "OVERWRITE"
 }
+
+# resource "aws_eks_addon" "secrets" {
+#   cluster_name = aws_eks_cluster.eks_cluster.name
+#   addon_name   = "metrics-server"
+#   depends_on = [ aws_eks_node_group.compute ]
+#   addon_version = "v0.8.1-eksbuild.10"
+#   resolve_conflicts_on_create = "OVERWRITE"
+# }
 
 
 # module "eks_blueprints_addons" {

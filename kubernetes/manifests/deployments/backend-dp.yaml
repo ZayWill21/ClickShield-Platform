@@ -16,7 +16,7 @@ metadata:
         spec:
           containers:
             - name: clickshield-backend
-              image: BACKEND_IMAGE
+              image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/clickshield-platform-repo:backend-c1ba7b34943cbdc663de3f45326c4ddaa616f822
               ports:
                 - containerPort: 8001
               env:
