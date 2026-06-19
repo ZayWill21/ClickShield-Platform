@@ -339,10 +339,10 @@ module "eks_blueprints_addons" {
   source = "aws-ia/eks-blueprints-addons/aws"
   version = "~> 1.23.0" #ensure to update this to the latest/desired version
 
-  cluster_name      = module.container_services.cluster_name
-  cluster_endpoint  = module.container_services.cluster_endpoint
-  cluster_version   = module.container_services.cluster_version
-  oidc_provider_arn = module.container_services.oidc_provider_arn
+  cluster_name      = aws_eks_cluster.eks_cluster.name
+  cluster_endpoint  = aws_eks_cluster.eks_cluster.endpoint
+  cluster_version   = aws_eks_cluster.eks_cluster.version
+  oidc_provider_arn = aws_eks_cluster.eks_cluster.oidc.issuer
 
   enable_aws_load_balancer_controller    = true
   enable_cluster_autoscaler = true

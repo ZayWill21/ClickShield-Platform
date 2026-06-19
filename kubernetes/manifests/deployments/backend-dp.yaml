@@ -26,7 +26,7 @@ spec:
             - name: GOOGLE_SAFE_BROWSING_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: google_safe_browsing_api_secret
+                  name: google-safe-browsing-api-secret
                   key: GOOGLE_SAFE_BROWSING_API_KEY
           resources:
             limits:
