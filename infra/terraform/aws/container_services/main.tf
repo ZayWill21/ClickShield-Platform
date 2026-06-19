@@ -286,55 +286,70 @@ resource "aws_eks_addon" "metrics-server" {
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
-# resource "aws_eks_addon" "secrets" {
-#   cluster_name = aws_eks_cluster.eks_cluster.name
-#   addon_name   = "metrics-server"
-#   depends_on = [ aws_eks_node_group.compute ]
-#   addon_version = "v0.8.1-eksbuild.10"
-#   resolve_conflicts_on_create = "OVERWRITE"
-# }
+resource "aws_eks_addon" "aws-network-flow-monitoring-agent" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "aws-network-flow-monitoring-agent"
+  depends_on = [ aws_eks_node_group.compute ]
+  addon_version = "v1.1.4-eksbuild.1"
+  resolve_conflicts_on_create = "OVERWRITE"
+}
 
+resource "aws_eks_addon" "aws-secrets-store-csi-driver-provider" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "aws-secrets-store-csi-driver-provider"
+  depends_on = [ aws_eks_node_group.compute ]
+  addon_version = "v3.1.1-eksbuild.1"
+  resolve_conflicts_on_create = "OVERWRITE"
+}
 
-# module "eks_blueprints_addons" {
-#   source = "aws-ia/eks-blueprints-addons/aws"
-#   version = "~> 1.0" #ensure to update this to the latest/desired version
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
 
-#   cluster_name      = module.container_services.cluster_name
-#   cluster_endpoint  = module.container_services.cluster_endpoint
-#   cluster_version   = module.container_services.cluster_version
-#   oidc_provider_arn = module.container_services.oidc_provider_arn
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
 
-#   eks_addons = {
-#     aws-ebs-csi-driver = {
-#       most_recent = true
-#     }
-#   }
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+  }
+}
 
-#   enable_aws_load_balancer_controller    = true
-#   enable_cluster_proportional_autoscaler = true
-#   enable_karpenter                       = true
-# }
+resource "aws_iam_role" "network-flow-monitor-agent-role" {
+  name               = "AmazonEKSPodIdentityAWSNetworkFlowMonitorAgentRole "
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
 
-# module "aws_ebs_csi_pod_identity" {
-#   source = "terraform-aws-modules/eks-pod-identity/aws"
+resource "aws_iam_role_policy_attachment" "example_s3" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSPodIdentityAWSNetworkFlowMonitorAgentRole"
+  role       = aws_iam_role.network-flow-monitor-agent-role.name
+}
 
-#   name = "aws-ebs-csi"
+resource "aws_eks_pod_identity_association" "example" {
+  cluster_name    = aws_eks_cluster.eks_cluster.name
+  namespace       = "kube-system"
+  service_account = "network-flow-monitoring-agent-sa"
+  role_arn        = aws_iam_role.NetworkFlowMonitorAgentRole.arn
+}
 
-#   attach_aws_ebs_csi_policy = true
-#   aws_ebs_csi_kms_arns      = ["arn:aws:kms:*:*:key/1234abcd-12ab-34cd-56ef-1234567890ab"]
+module "eks_blueprints_addons" {
+  source = "aws-ia/eks-blueprints-addons/aws"
+  version = "~> 1.23.0" #ensure to update this to the latest/desired version
 
-#   associations = {
-#     this = {
-#       cluster_name    = "example"
-#       namespace       = "kube-system"
-#       service_account = "ebs-csi-controller-sa"
-#     }
-#   }
+  cluster_name      = module.container_services.cluster_name
+  cluster_endpoint  = module.container_services.cluster_endpoint
+  cluster_version   = module.container_services.cluster_version
+  oidc_provider_arn = module.container_services.oidc_provider_arn
 
-#   tags = {
-#     Environment = "dev"
-#   }
-# }
+  enable_aws_load_balancer_controller    = true
+  enable_cluster_autoscaler = true
+  enable_secrets_store_csi_driver_provider_aws	= true
+  enable_aws_for_fluentbit = true
+}
+
 
 #**************************Add GuardDuty, Fluentbit, Secrets Store CSI Driver, Prometheus Node Exporter and other add-ons as needed**************************
 
