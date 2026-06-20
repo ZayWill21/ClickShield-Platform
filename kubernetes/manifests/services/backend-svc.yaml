@@ -8,7 +8,7 @@ metadata:
 spec:
   type: ClusterIP    # internal-only; correct for nginx→backend
   selector:
-      app.kubernetes.io/name: clickshield-backend
+      app: clickshield-backend
   ports:
     - name: http
       port: 8001                  # the port nginx will call
