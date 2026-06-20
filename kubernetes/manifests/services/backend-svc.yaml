@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-svc
+  namespace: default
+  labels:
+    app: clickshield-backend
+spec:
+  type: ClusterIP    # internal-only; correct for nginx→backend
+  selector:
+      app.kubernetes.io/name: clickshield-backend
+  ports:
+    - name: http
+      port: 8001                  # the port nginx will call
+      targetPort: 8001            # the containerPort the backend listens on
+          
