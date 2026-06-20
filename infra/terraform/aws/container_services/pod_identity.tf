@@ -314,12 +314,12 @@ data "aws_iam_policy_document" "assume_role_for_aws-load-balancer-controller" {
 
 resource "aws_iam_role" "k8_aws-load-balancer-controller_role" {
   name               = "k8_aws-load-balancer-controller_role"
-  assume_role_policy = jsonencode(data.aws_iam_policy_document.assume_role.json)
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_iam_policy" "k8_aws-load-balancer-controller_policy" {
   name   = "AWSLoadBalancerControllerIAMPolicy"
-  policy = jsonencode(data.aws_iam_policy_document.assume_role_for_aws-load-balancer-controller.json)
+  policy = data.aws_iam_policy_document.assume_role_for_aws-load-balancer-controller.json
 }
 
 resource "aws_iam_role_policy_attachment" "k8_aws-load-balancer-controller_attachment" {
