@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: "2026-06-20T04:49:07Z"
+  name: clickshield-backend-sa
+  namespace: default
+  resourceVersion: "3114059"
+  uid: 121c2b24-3fbc-4d71-b749-2d5d788ac753

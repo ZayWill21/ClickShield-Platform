@@ -319,12 +319,13 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "network-flow-monitor-agent-role" {
-  name               = "AmazonEKSPodIdentityAWSNetworkFlowMonitorAgentRole"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  name = "network-flow-monitor-agent-role"
+  description = "IAM role for AWS Network Flow Monitoring Agent"
+  assume_role_policy = jsonencode(data.aws_iam_policy_document.assume_role.json)
 }
 
 resource "aws_iam_role_policy_attachment" "example_s3" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSPodIdentityAWSNetworkFlowMonitorAgentRole"
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchNetworkFlowMonitorAgentPublishPolicy"
   role       = aws_iam_role.network-flow-monitor-agent-role.name
 }
 
@@ -335,19 +336,19 @@ resource "aws_eks_pod_identity_association" "example" {
   role_arn        = aws_iam_role.network-flow-monitor-agent-role.arn
 }
 
-module "eks_blueprints_addons" {
-  source = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.23.0"
-  cluster_name      = aws_eks_cluster.eks_cluster.name
-  cluster_endpoint  = aws_eks_cluster.eks_cluster.endpoint
-  cluster_version   = aws_eks_cluster.eks_cluster.version
-  oidc_provider_arn = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+# module "eks_blueprints_addons" {
+#   source = "aws-ia/eks-blueprints-addons/aws"
+#   version = "~> 1.23.0"
+#   cluster_name      = aws_eks_cluster.eks_cluster.name
+#   cluster_endpoint  = aws_eks_cluster.eks_cluster.endpoint
+#   cluster_version   = aws_eks_cluster.eks_cluster.version
+#   oidc_provider_arn = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 
-  enable_aws_load_balancer_controller           = true
-  enable_cluster_autoscaler                     = true
-  enable_secrets_store_csi_driver_provider_aws	= true
-  enable_aws_for_fluentbit                      = true
-}
+#   enable_aws_load_balancer_controller           = true
+#   enable_cluster_autoscaler                     = true
+#   enable_secrets_store_csi_driver_provider_aws	= true
+#   enable_aws_for_fluentbit                      = true
+# }
 
 
 #**************************Add GuardDuty, Fluentbit, Secrets Store CSI Driver, Prometheus Node Exporter and other add-ons as needed**************************
