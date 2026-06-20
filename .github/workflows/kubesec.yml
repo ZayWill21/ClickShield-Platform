@@ -26,7 +26,7 @@ jobs:
         with:
           input: kubernetes/manifests/deployments/backend-dp.yaml # specify configuration file to scan here
           format: template
-          template: template/sarif.tpl
+          template: templates/sarif.tpl
           output: kubesec-backend-results.sarif
           exit-code: "0"
 
@@ -41,7 +41,7 @@ jobs:
         with:
           input: kubernetes/manifests/deployments/frontend-dp.yaml # specify configuration file to scan here
           format: template
-          template: template/sarif.tpl
+          template: templates/sarif.tpl
           output: kubesec-frontend-results.sarif
           exit-code: "0"
 
