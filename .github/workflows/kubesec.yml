@@ -25,28 +25,28 @@ jobs:
         uses: controlplaneio/kubesec-action@43d0ddff5ffee89a6bb9f29b64cd865411137b14
         with:
           input: kubernetes/manifests/deployments/backend-dp.yaml # specify configuration file to scan here
-          format: template
-          template: templates/sarif.tpl
-          output: kubesec-backend-results.sarif
+          # format: template
+          # template: templates/sarif.tpl
+          # output: kubesec-frontend-results.sarif
           exit-code: "0"
 
-      - name: Upload Kubesec scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: 'kubesec-backend-results.sarif'
-          category: "kubernetes"
+      # - name: Upload Kubesec scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v4
+      #   with:
+      #     sarif_file: 'kubesec-backend-results.sarif'
+      #     category: "kubernetes"
 
       - name: Run kubesec scanner
         uses: controlplaneio/kubesec-action@43d0ddff5ffee89a6bb9f29b64cd865411137b14
         with:
           input: kubernetes/manifests/deployments/frontend-dp.yaml # specify configuration file to scan here
-          format: template
-          template: templates/sarif.tpl
-          output: kubesec-frontend-results.sarif
+          # format: template
+          # template: templates/sarif.tpl
+          # output: kubesec-frontend-results.sarif
           exit-code: "0"
 
-      - name: Upload Kubesec scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: 'kubesec-frontend-results.sarif'
-          category: "kubernetes"
+      # - name: Upload Kubesec scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v4
+      #   with:
+      #     sarif_file: 'kubesec-frontend-results.sarif'
+      #     category: "kubernetes"
