@@ -302,39 +302,31 @@ resource "aws_eks_addon" "aws-secrets-store-csi-driver-provider" {
   resolve_conflicts_on_create = "OVERWRITE"
 }
 
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["pods.eks.amazonaws.com"]
-    }
-
-    actions = [
-      "sts:AssumeRole",
-      "sts:TagSession"
-    ]
-  }
+resource "aws_eks_addon" "cert-manager" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "cert-manager"
+  depends_on = [ aws_eks_node_group.compute ]
+  addon_version = "v1.20.2-eksbuild.3"
+  resolve_conflicts_on_create = "OVERWRITE"
 }
 
-resource "aws_iam_role" "network-flow-monitor-agent-role" {
-  name = "network-flow-monitor-agent-role"
-  description = "IAM role for AWS Network Flow Monitoring Agent"
-  assume_role_policy = jsonencode(data.aws_iam_policy_document.assume_role.json)
-}
+# resource "aws_iam_role" "network-flow-monitor-agent-role" {
+#   name = "network-flow-monitor-agent-role"
+#   description = "IAM role for AWS Network Flow Monitoring Agent"
+#   assume_role_policy = jsonencode(data.aws_iam_policy_document.assume_role.json)
+# }
 
-resource "aws_iam_role_policy_attachment" "example_s3" {
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchNetworkFlowMonitorAgentPublishPolicy"
-  role       = aws_iam_role.network-flow-monitor-agent-role.name
-}
+# resource "aws_iam_role_policy_attachment" "example_s3" {
+#   policy_arn = "arn:aws:iam::aws:policy/CloudWatchNetworkFlowMonitorAgentPublishPolicy"
+#   role       = aws_iam_role.network-flow-monitor-agent-role.name
+# }
 
-resource "aws_eks_pod_identity_association" "example" {
-  cluster_name    = aws_eks_cluster.eks_cluster.name
-  namespace       = "kube-system"
-  service_account = "network-flow-monitoring-agent-sa"
-  role_arn        = aws_iam_role.network-flow-monitor-agent-role.arn
-}
+# resource "aws_eks_pod_identity_association" "example" {
+#   cluster_name    = aws_eks_cluster.eks_cluster.name
+#   namespace       = "kube-system"
+#   service_account = "network-flow-monitoring-agent-sa"
+#   role_arn        = aws_iam_role.network-flow-monitor-agent-role.arn
+# }
 
 # module "eks_blueprints_addons" {
 #   source = "aws-ia/eks-blueprints-addons/aws"
