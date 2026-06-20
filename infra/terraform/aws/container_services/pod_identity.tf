@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "assume_role_network_flow_monitoring_agent" {
+data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
 
@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "assume_role_network_flow_monitoring_agent" {
 resource "aws_iam_role" "network-flow-monitor-agent-role" {
   name = "network-flow-monitor-agent-role"
   description = "IAM role for AWS Network Flow Monitoring Agent"
-  assume_role_policy = jsonencode(data.aws_iam_policy_document.assume_role_network_flow_monitoring_agent.json)
+  assume_role_policy = jsonencode(data.aws_iam_policy_document.assume_role.json)
 }
 
 resource "aws_iam_role_policy_attachment" "network-flow-monitor-agent-policy-attachment" {
