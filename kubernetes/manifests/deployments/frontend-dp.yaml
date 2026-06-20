@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: clickshield-frontend
-          image: 298350610133.dkr.ecr.us-east-1.amazonaws.com/clickshield-platform-repo:frontend-d0d08ed2c79c159a6747aef414dd723df088f28e
+          image: 298350610133.dkr.ecr.us-east-1.amazonaws.com/clickshield-platform-repo:frontend-86666561dfa4c2dc01fb021b6a1bc9ca509340d6
           ports:
             - containerPort: 80 #Nginx listens on 80
           resource:
