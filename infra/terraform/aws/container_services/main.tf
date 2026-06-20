@@ -319,7 +319,7 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "network-flow-monitor-agent-role" {
-  name               = "AmazonEKSPodIdentityAWSNetworkFlowMonitorAgentRole "
+  name               = "AmazonEKSPodIdentityAWSNetworkFlowMonitorAgentRole"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
@@ -332,22 +332,21 @@ resource "aws_eks_pod_identity_association" "example" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
   namespace       = "kube-system"
   service_account = "network-flow-monitoring-agent-sa"
-  role_arn        = aws_iam_role.NetworkFlowMonitorAgentRole.arn
+  role_arn        = aws_iam_role.network-flow-monitor-agent-role.arn
 }
 
 module "eks_blueprints_addons" {
   source = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.23.0" #ensure to update this to the latest/desired version
-
+  version = "~> 1.23.0"
   cluster_name      = aws_eks_cluster.eks_cluster.name
   cluster_endpoint  = aws_eks_cluster.eks_cluster.endpoint
   cluster_version   = aws_eks_cluster.eks_cluster.version
-  oidc_provider_arn = aws_eks_cluster.eks_cluster.oidc.issuer
+  oidc_provider_arn = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 
-  enable_aws_load_balancer_controller    = true
-  enable_cluster_autoscaler = true
+  enable_aws_load_balancer_controller           = true
+  enable_cluster_autoscaler                     = true
   enable_secrets_store_csi_driver_provider_aws	= true
-  enable_aws_for_fluentbit = true
+  enable_aws_for_fluentbit                      = true
 }
 
 
