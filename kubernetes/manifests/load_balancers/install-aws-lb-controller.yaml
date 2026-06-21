@@ -1301,7 +1301,7 @@ spec:
       priorityClassName: system-cluster-critical
       securityContext:
         fsGroup: 1337
-      serviceAccountName: aws-load-balancer-controller-sa
+      serviceAccountName: aws-load-balancer-controller
       terminationGracePeriodSeconds: 10
       volumes:
       - name: cert
