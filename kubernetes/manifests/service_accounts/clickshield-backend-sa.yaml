@@ -5,3 +5,5 @@ metadata:
     kubernetes.io/enforce-mountable-secrets: "true"
   name: clickshield-backend-sa
   namespace: default
+secretKeyRef:
+  - name: google-safe-browsing-api-secret
