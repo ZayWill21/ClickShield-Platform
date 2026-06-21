@@ -29,6 +29,7 @@ jobs:
       TF_VAR_vpc_flow_logs_role: ${{ secrets.VPC_FLOW_LOGS_ROLE }}
       TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
       TF_VAR_Access_Key_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      TF_VAR_argo_cd_idc_instance_arn: ${{ secrets.ARGO_CD_IDC_INSTANCE_ARN }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:

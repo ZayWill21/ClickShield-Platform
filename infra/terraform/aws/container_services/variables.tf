@@ -61,7 +61,7 @@ variable "private_subnet_ids" {
   description = "List of private subnet IDs"
 }
 
-# variable "Access_Key_ID" {
-#   type = string
-#   description = "AWS Access Key ID for GitHub Actions"
-# }
+variable "argo_cd_idc_instance_arn" {
+  type        = string
+  description = "The ARN of the identity center role to use for the Argo CD instance"
+}

@@ -388,7 +388,7 @@ resource "aws_eks_node_group" "compute" {
   scaling_config {
     desired_size = 2
     max_size = 2
-    min_size = 1
+    min_size = 0
   }
   disk_size = 30
   subnet_ids = var.private_subnet_ids
@@ -401,24 +401,45 @@ resource "aws_eks_node_group" "compute" {
 
 # -----------------Need to create IAM role for ArgoCD and attach it to the EKS cluster for ArgoCD to work properly. This is a placeholder for now.-----------------
 
-# resource "aws_eks_capability" "argoCD" {
-#   cluster_name              = aws_eks_cluster.eks_cluster.name
-#   capability_name           = "argocd"
-#   type                      = "ARGOCD"
-#   role_arn                  = aws_iam_role.example.arn
-#   delete_propagation_policy = "RETAIN"
+resource "aws_iam_role" "AmazonEKSCapabilityArgoCDRole" {
+  name = "AmazonEKSCapabilityArgoCDRole"
+  description = "IAM role for ArgoCD capability in EKS cluster"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "capabilities.eks.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  })
+}
 
-#   configuration {
-#     argo_cd {
-#       aws_idc {
-#         idc_instance_arn = "arn:aws:sso:::instance/ssoins-1234567890abcdef0"
-#       }
-#       namespace = "argocd"
-#     }
-#   }
+resource "aws_iam_role_policy_attachment" "AmazonEKSCapabilityArgoCDPolicyAttachment" {
+  policy_arn = "arn:aws:iam::aws:policy/AWSSecretsManagerClientReadOnlyAccess"
+  role       = aws_iam_role.AmazonEKSCapabilityArgoCDRole.name
+}
+resource "aws_eks_capability" "argoCD" {
+  cluster_name              = aws_eks_cluster.eks_cluster.name
+  capability_name           = "clickshield-eks-cluster-argocd"
+  type                      = "ARGOCD"
+  role_arn                  = aws_iam_role.AmazonEKSCapabilityArgoCDRole.arn
+  delete_propagation_policy = "RETAIN"
 
-#   tags = {
-#     "CreatedBy" = "Terraform"
-#     "auto-delete" = "no"
-#     }
-# }
+  configuration {
+    argo_cd {
+      aws_idc {
+        idc_instance_arn = var.argo_cd_idc_instance_arn
+      }
+      namespace = "argocd"
+    }
+  }
+
+  tags = {
+    "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
+    }
+}
