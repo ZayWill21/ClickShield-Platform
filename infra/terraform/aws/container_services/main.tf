@@ -398,3 +398,27 @@ resource "aws_eks_node_group" "compute" {
     "auto-delete" = "no"
     }
 }
+
+# -----------------Need to create IAM role for ArgoCD and attach it to the EKS cluster for ArgoCD to work properly. This is a placeholder for now.-----------------
+
+resource "aws_eks_capability" "argoCD" {
+  cluster_name              = aws_eks_cluster.eks_cluster.name
+  capability_name           = "argocd"
+  type                      = "ARGOCD"
+  role_arn                  = aws_iam_role.example.arn
+  delete_propagation_policy = "RETAIN"
+
+  configuration {
+    argo_cd {
+      aws_idc {
+        idc_instance_arn = "arn:aws:sso:::instance/ssoins-1234567890abcdef0"
+      }
+      namespace = "argocd"
+    }
+  }
+
+  tags = {
+    "CreatedBy" = "Terraform"
+    "auto-delete" = "no"
+    }
+}
