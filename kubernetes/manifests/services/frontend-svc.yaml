@@ -1,7 +1,7 @@
 kind: Service
 metadata:
-  name: service-orange
-  namespace: example-ns
+  name: clickshield-frontend-svc
+  namespace: default
 spec:
   ports:
     - port: 80
