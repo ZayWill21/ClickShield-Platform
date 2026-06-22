@@ -19,10 +19,3 @@ spec:
           image: 298350610133.dkr.ecr.us-east-1.amazonaws.com/clickshield-platform-repo:frontend-2c4ea490de430c54e588e0def405c35e2aace680
           ports:
             - containerPort: 80 #Nginx listens on 80
-          resource:
-            limits:
-              cpu: "500m"
-              memory: "256Mi"
-            requests:
-              cpu: "200m"
-              memory: "128Mi"
