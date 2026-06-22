@@ -15,6 +15,7 @@ module "container_services" {
   
   # Networking outputs
   private_subnet_ids   = module.networking.private_subnet_ids[*]
+  argo_cd_idc_instance_arn = var.argo_cd_idc_instance_arn
 
   # Networking outputs variables
   private_subnet_cidrs = var.private_subnet_cidrs
