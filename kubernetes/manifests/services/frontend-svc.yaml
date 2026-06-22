@@ -1,0 +1,12 @@
+kind: Service
+metadata:
+  name: service-orange
+  namespace: example-ns
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: clickshield-frontend
