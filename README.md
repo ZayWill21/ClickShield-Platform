@@ -8,6 +8,8 @@ ClickShield is a full-stack URL safety scanner (React + Vite frontend, Express A
 that checks URLs against Google Safe Browsing. This repo owns the **build, security, and
 deployment** pipeline around it.
 
+![Archtecture](assets/Archtecture.png)
+
 ---
 
 ## Architecture
