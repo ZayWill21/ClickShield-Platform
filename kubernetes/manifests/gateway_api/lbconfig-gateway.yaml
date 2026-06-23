@@ -1,7 +1,7 @@
 apiVersion: gateway.k8s.aws/v1beta1
 kind: LoadBalancerConfiguration
 metadata:
-  name: lb-config-gateway
+  name: lbconfig-gateway
   namespace: default
 spec:
   loadBalancerName: "k8-gateway-alb"
