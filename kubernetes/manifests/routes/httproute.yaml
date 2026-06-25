@@ -13,5 +13,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: clickshield-backend-svc
+        - name: clickshield-frontend-svc
           port: 80
