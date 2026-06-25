@@ -17,10 +17,3 @@ spec:
       allowedRoutes:
         namespaces:
           from: Same
-    - name: https
-      hostname: "clickshield.com"
-      protocol: HTTPS
-      port: 443
-      allowedRoutes:
-        namespaces:
-          from: Same

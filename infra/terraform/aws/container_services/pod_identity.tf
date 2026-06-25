@@ -318,7 +318,7 @@ resource "aws_iam_role" "k8_aws-load-balancer-controller_role" {
 }
 
 resource "aws_iam_policy" "k8_aws-load-balancer-controller_policy" {
-  name   = "k8AWSLoadBalancerControllerIAMPolicy"
+  name   = "AWSLoadBalancerControllerIAMPolicy"
   policy = data.aws_iam_policy_document.assume_role_for_aws-load-balancer-controller.json
 }
 

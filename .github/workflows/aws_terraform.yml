@@ -80,6 +80,10 @@ jobs:
       run: terraform state list
       working-directory: ./infra/terraform
 
+    # - name: Terraform import
+    #   run: terraform import aws_iam_role.AmazonEKSCapabilityArgoCDRole 
+    #   working-directory: ./infra/terraform
+
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: plan

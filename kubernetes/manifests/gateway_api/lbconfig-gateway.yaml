@@ -6,3 +6,5 @@ metadata:
 spec:
   loadBalancerName: "k8-gateway-alb"
   scheme: internet-facing
+  listenerConfigurations:
+    - protocolPort: HTTP:80
