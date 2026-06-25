@@ -83,14 +83,17 @@ jobs:
     # - name: Terraform import
     #   run: terraform import aws_iam_role.AmazonEKSCapabilityArgoCDRole 
     #   working-directory: ./infra/terraform
-
-    # Generates an execution plan for Terraform
-    - name: Terraform Plan
-      id: plan
-      run: terraform plan 
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
       working-directory: ./infra/terraform
 
-    #  On push to "main", build or change infrastructure according to Terraform configuration files
-    - name: Terraform Apply
-      run: terraform apply -auto-approve 
-      working-directory: ./infra/terraform
+    # # Generates an execution plan for Terraform
+    # - name: Terraform Plan
+    #   id: plan
+    #   run: terraform plan 
+    #   working-directory: ./infra/terraform
+
+    # #  On push to "main", build or change infrastructure according to Terraform configuration files
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve 
+    #   working-directory: ./infra/terraform
