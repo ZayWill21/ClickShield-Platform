@@ -17,7 +17,7 @@ spec:
       serviceAccountName: clickshield-backend-sa
       containers:
         - name: clickshield-backend
-          image: 298350610133.dkr.ecr.us-east-1.amazonaws.com/clickshield-platform-repo:backend-2c4ea490de430c54e588e0def405c35e2aace680
+          image: 
           ports:
             - containerPort: 8001
           env:
