@@ -3,8 +3,6 @@ name: AWS Terraform Runner
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - infra/terraform/*
   pull_request:
 
 permissions:

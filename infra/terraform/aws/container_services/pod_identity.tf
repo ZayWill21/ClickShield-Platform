@@ -330,6 +330,6 @@ resource "aws_iam_role_policy_attachment" "k8_aws-load-balancer-controller_attac
 resource "aws_eks_pod_identity_association" "k8_aws-load-balancer-controller_association" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
   namespace       = "kube-system"
-  service_account = "aws-load-balancer-controller-sa"
+  service_account = "aws-load-balancer-controller"
   role_arn        = aws_iam_role.k8_aws-load-balancer-controller_role.arn
 }
