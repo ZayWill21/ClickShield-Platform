@@ -81,9 +81,9 @@ jobs:
       working-directory: ./infra/terraform
 
 
-    # - name: Terraform Destroy
-    #   run: terraform destroy -auto-approve
-    #   working-directory: ./infra/terraform #try again
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
+      working-directory: ./infra/terraform #try again
 
     # # Generates an execution plan for Terraform
     # - name: Terraform Plan
@@ -91,7 +91,7 @@ jobs:
     #   run: terraform plan 
     #   working-directory: ./infra/terraform
 
-    #  On push to "main", build or change infrastructure according to Terraform configuration files
-    - name: Terraform Apply
-      run: terraform apply -auto-approve 
-      working-directory: ./infra/terraform
+    # #  On push to "main", build or change infrastructure according to Terraform configuration files
+    # - name: Terraform Apply
+    #   run: terraform apply -auto-approve 
+    #   working-directory: ./infra/terraform
