@@ -1,0 +1,115 @@
+{
+  "summary": {
+    "title": "Secure EKS DevSecOps Platform",
+    "owner": "Isaiah William",
+    "description": "AWS EKS DevSecOps Platform with GitHub Actions, ArgoCD, Trivy, Checkov, Prometheus, Grafana, and Secrets Manager."
+  },
+  "detail": {
+    "contributors": [],
+    "diagrams": [
+      {
+        "title": "Secure EKS DevSecOps Architecture",
+        "thumbnail": "",
+        "version": "2.1.0",
+        "cells": [],
+        "description": "Threat model for Kubernetes-based DevSecOps platform."
+      }
+    ],
+    "reviewer": "",
+    "threatTop10": {
+      "spoofing": true,
+      "tampering": true,
+      "repudiation": true,
+      "informationDisclosure": true,
+      "denialOfService": true,
+      "elevationOfPrivilege": true
+    }
+  },
+  "threats": [
+    {
+      "title": "Developer Credential Theft",
+      "description": "Attacker obtains GitHub credentials and pushes malicious code.",
+      "severity": "High",
+      "type": "Spoofing",
+      "mitigation": "MFA, branch protection, signed commits, least privilege."
+    },
+    {
+      "title": "Malicious Code Injection",
+      "description": "Unauthorized code introduced into source repository.",
+      "severity": "High",
+      "type": "Tampering",
+      "mitigation": "Pull request reviews, protected branches, CODEOWNERS."
+    },
+    {
+      "title": "Pipeline Manipulation",
+      "description": "GitHub Actions workflow modified to bypass security checks.",
+      "severity": "High",
+      "type": "Tampering",
+      "mitigation": "Protected workflows, approvals, repository permissions."
+    },
+    {
+      "title": "Container Image Vulnerabilities",
+      "description": "Deployment of vulnerable images into EKS.",
+      "severity": "High",
+      "type": "Information Disclosure",
+      "mitigation": "Trivy scanning, image signing, vulnerability gates."
+    },
+    {
+      "title": "Terraform Misconfiguration",
+      "description": "Insecure infrastructure deployed through IaC.",
+      "severity": "High",
+      "type": "Elevation of Privilege",
+      "mitigation": "Checkov scans, peer review, policy enforcement."
+    },
+    {
+      "title": "Secrets Exposure",
+      "description": "Secrets stored in code repositories or Kubernetes manifests.",
+      "severity": "Critical",
+      "type": "Information Disclosure",
+      "mitigation": "AWS Secrets Manager, secret scanning, RBAC."
+    },
+    {
+      "title": "Kubernetes RBAC Abuse",
+      "description": "Excessive permissions granted to users or service accounts.",
+      "severity": "High",
+      "type": "Elevation of Privilege",
+      "mitigation": "Least privilege RBAC, periodic reviews."
+    },
+    {
+      "title": "Pod-to-Pod Lateral Movement",
+      "description": "Compromised workload communicates with unauthorized services.",
+      "severity": "High",
+      "type": "Elevation of Privilege",
+      "mitigation": "Network Policies, namespace isolation."
+    },
+    {
+      "title": "ArgoCD Compromise",
+      "description": "Unauthorized deployment through GitOps controller.",
+      "severity": "High",
+      "type": "Tampering",
+      "mitigation": "SSO, RBAC, audit logging."
+    },
+    {
+      "title": "Monitoring Stack Exposure",
+      "description": "Prometheus or Grafana exposed to unauthorized users.",
+      "severity": "Medium",
+      "type": "Information Disclosure",
+      "mitigation": "Authentication, TLS, restricted ingress."
+    },
+    {
+      "title": "Denial of Service Against EKS",
+      "description": "Excessive traffic overwhelms workloads.",
+      "severity": "High",
+      "type": "Denial of Service",
+      "mitigation": "Autoscaling, rate limiting, WAF."
+    },
+    {
+      "title": "Lack of Auditability",
+      "description": "Insufficient logging of deployments and cluster activity.",
+      "severity": "Medium",
+      "type": "Repudiation",
+      "mitigation": "CloudTrail, Kubernetes audit logs, Git history."
+    }
+  ]
+}
+
