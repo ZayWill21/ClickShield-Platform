@@ -1,0 +1,28 @@
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: check-label-maintainer
+spec:
+  evaluation:
+    mode: "JSON"
+  matchConditions:
+    - name: isDockerfile
+      expression: "has(object.Stages)"
+  validations:
+    - message: "MAINTAINER is deprecated, use LABELS instead"
+      expression: |
+        !object.Stages.exists(stage,
+          has(stage.Commands) &&
+            stage.Commands.exists(cmd, cmd.Name == 'MAINTAINER')
+        )
+    - message: "Use the LABELS instruction to set the MAINTAINER name"
+      expression: |
+        object.Stages.exists(stage,
+          has(stage.Commands) && stage.Commands.exists(cmd,
+            has(cmd.Labels) && cmd.Labels.exists(label,
+              label.Key == 'maintainer' ||
+              label.Key == 'owner' ||
+              label.Key == 'author'
+            )
+          )
+        )
